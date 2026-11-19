@@ -1,0 +1,8 @@
+:root { --navy:#102a43; --blue:#1769aa; }
+body { background:#f5f7fb; color:#1f2937; }
+.bg-navy { background:var(--navy)!important; }
+.hero { background:linear-gradient(135deg,var(--navy),#1f6fae); }
+.card { border:0; border-radius:1rem; box-shadow:0 8px 24px rgba(16,42,67,.08); }
+.btn { border-radius:.65rem; }
+.form-control,.form-select { border-radius:.65rem; min-height:42px; }
+.item-image { height:180px; object-fit:cover; border-radius:1rem 1rem 0 0; }

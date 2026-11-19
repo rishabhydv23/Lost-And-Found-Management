@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<h2>My claims</h2>{% for claim in claims %}<div class="card p-3 mb-3"><div class="d-flex justify-between"><h5>{{ claim.report.item_name }}</h5><span class="badge bg-secondary">{{ claim.status }}</span></div><p class="text-muted mb-0">Submitted {{ claim.created_at|date:'M d, Y' }}</p>{% if claim.admin_remarks %}<p class="mt-2">Admin remarks: {{ claim.admin_remarks }}</p>{% endif %}</div>{% empty %}<p>No claims submitted.</p>{% endfor %}{% endblock %}
