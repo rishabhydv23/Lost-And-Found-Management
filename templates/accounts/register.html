@@ -1,2 +1,4 @@
 {% extends 'base.html' %}
-{% block content %}<div class="row justify-content-center"><div class="col-md-7 col-lg-5"><div class="card p-4"><h2>Create account</h2><form method="post">{% csrf_token %}<table class="table table-borderless">{{ form.as_table }}</table><button class="btn btn-primary w-100">Register</button></form><p class="mt-3 mb-0">Already registered? <a href="{% url 'login' %}">Login</a></p></div></div></div>{% endblock %}
+{% block content %}
+<div class="row auth-wrap"><div class="col-12"><div class="auth-card"><p class="eyebrow mb-2">Join the community</p><h2 class="mb-1">Create your account</h2><p class="text-muted mb-4">Register as a student, faculty or staff member.</p><form method="post">{% csrf_token %}<table class="table table-borderless">{{ form.as_table }}</table><button class="btn btn-primary w-100 mt-2">Register</button></form><p class="mt-3 mb-0 small text-muted">Already registered? <a href="{% url 'login' %}">Login</a></p></div></div></div>
+{% endblock %}

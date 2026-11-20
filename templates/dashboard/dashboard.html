@@ -1,2 +1,47 @@
 {% extends 'base.html' %}
-{% block content %}<div class="d-flex justify-content-between mb-3"><h2>User dashboard</h2><div><a class="btn btn-primary" href="{% url 'report_lost' %}">Report lost</a> <a class="btn btn-outline-primary" href="{% url 'report_found' %}">Report found</a></div></div><div class="row g-3">{% with stats=lost_count|add:found_count %}<div class="col-md-4 col-lg-2"><div class="card p-3"><small>Lost reports</small><h3>{{ lost_count }}</h3></div></div><div class="col-md-4 col-lg-2"><div class="card p-3"><small>Found reports</small><h3>{{ found_count }}</h3></div></div><div class="col-md-4 col-lg-2"><div class="card p-3"><small>Active reports</small><h3>{{ active_count }}</h3></div></div><div class="col-md-4 col-lg-2"><div class="card p-3"><small>Potential matches</small><h3>{{ match_count }}</h3></div></div><div class="col-md-4 col-lg-2"><div class="card p-3"><small>Pending claims</small><h3>{{ claim_count }}</h3></div></div><div class="col-md-4 col-lg-2"><div class="card p-3"><small>Recovered</small><h3>{{ recovered_count }}</h3></div></div>{% endwith %}</div><div class="row g-4 mt-2"><div class="col-lg-7"><div class="card p-3"><h5>Recent reports</h5>{% for item in recent_reports %}<div class="border-bottom py-2 d-flex justify-content-between"><a href="{% url 'item_detail' item.pk %}">{{ item.item_name }}</a><span class="badge bg-secondary">{{ item.status }}</span></div>{% empty %}<p class="text-muted">No reports yet.</p>{% endfor %}</div></div><div class="col-lg-5"><div class="card p-3"><h5>Recent notifications</h5>{% for notification in notifications %}<div class="border-bottom py-2">{{ notification.message }}</div>{% empty %}<p class="text-muted">No notifications.</p>{% endfor %}</div></div></div>{% endblock %}
+{% block content %}
+<div class="dashboard-heading d-flex align-items-end justify-content-between mb-4">
+  <div><h2 class="mb-1">Good to see you, {{ user.first_name|default:user.username }}</h2><p class="text-muted mb-0">Here's where your reports stand today.</p></div>
+  <div class="d-flex gap-2">
+    <a class="btn dashboard-found-btn" href="{% url 'report_found' %}"><span class="me-1">+</span> Found item</a>
+    <a class="btn dashboard-lost-btn" href="{% url 'report_lost' %}"><span class="me-1">+</span> Lost item</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-2"><div class="metric-card"><span>Lost reports</span><strong>{{ lost_count }}</strong><small class="text-success">Active tracking</small></div></div>
+  <div class="col-6 col-lg-2"><div class="metric-card"><span>Found reports</span><strong>{{ found_count }}</strong><small>Registered</small></div></div>
+  <div class="col-6 col-lg-2"><div class="metric-card"><span>Active reports</span><strong>{{ active_count }}</strong><small>Open</small></div></div>
+  <div class="col-6 col-lg-2"><div class="metric-card accent-green"><span>Potential matches</span><strong>{{ match_count }}</strong><small>Needs review</small></div></div>
+  <div class="col-6 col-lg-2"><div class="metric-card accent-purple"><span>Pending claims</span><strong>{{ claim_count }}</strong><small>In progress</small></div></div>
+  <div class="col-6 col-lg-2"><div class="metric-card"><span>Recovered</span><strong>{{ recovered_count }}</strong><small class="text-success">Completed</small></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="card dashboard-panel h-100">
+      <div class="panel-heading"><div><h5 class="mb-0">Recent reports</h5></div><a class="text-decoration-none" href="{% url 'my_reports' %}">View all</a></div>
+      <div class="report-table">
+        {% for item in recent_reports %}
+        <a class="report-row" href="{% url 'item_detail' item.pk %}">
+          <span class="report-icon">{% if item.report_type == 'LOST' %}L{% else %}F{% endif %}</span>
+          <span class="report-name"><strong>{{ item.item_name }}</strong><small>{{ item.category.name }} · {{ item.campus_location }}</small></span>
+          <span class="status-pill status-{{ item.status|lower }}">{{ item.status|title }}</span>
+          <span class="row-arrow">›</span>
+        </a>
+        {% empty %}<div class="empty-state recent-empty"><strong>No reports yet</strong><span>Lost something or found something? Your reports will show up here.</span><a href="{% url 'my_reports' %}">Report an item</a></div>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card dashboard-panel h-100">
+      <div class="panel-heading"><div><h5 class="mb-0">Notifications</h5></div><a class="text-decoration-none" href="{% url 'notifications' %}">Open</a></div>
+      <div class="notification-list">
+        {% for notification in notifications %}
+        <div class="notification-row"><span class="notification-dot"></span><div><strong>{{ notification.message }}</strong><small>{{ notification.created_at|timesince }} ago</small></div></div>
+        {% empty %}<div class="empty-state">You're all caught up.</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
