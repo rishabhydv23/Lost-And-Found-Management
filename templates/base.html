@@ -13,113 +13,116 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
-<!-- Mobile sidebar toggle -->
-<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.sidebar-overlay').classList.toggle('show')">☰</button>
-<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.sidebar-overlay').classList.toggle('show')">☰</button>
+  <div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
 
-<div class="app-layout">
-  <!-- ===== Sidebar ===== -->
-  <aside class="sidebar">
-    <a class="sidebar-brand" href="{% url 'home' %}">
-      <span class="sidebar-brand-icon">LF</span>
-      <span class="sidebar-brand-text">LPU Lost & Found<small>Campus System</small></span>
-    </a>
+  <div class="app-layout">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="{% url 'home' %}">
+        <img src="{% static 'images/logo.png' %}" class="sidebar-brand-icon" alt="LPU Lost & Found Logo">
+        <span class="sidebar-brand-text">LPU Lost & Found<small>Campus System</small></span>
+      </a>
 
-    <nav class="sidebar-section">
-      <div class="sidebar-label">Menu</div>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
-        <span class="link-icon">🏠</span> Home
-      </a>
-      <a class="sidebar-link {% if request.GET.type == 'LOST' %}active{% endif %}" href="{% url 'browse' %}?type=LOST">
-        <span class="link-icon">🔍</span> Lost Items
-      </a>
-      <a class="sidebar-link {% if request.GET.type == 'FOUND' %}active{% endif %}" href="{% url 'browse' %}?type=FOUND">
-        <span class="link-icon">📦</span> Found Items
-      </a>
-    </nav>
+      <!-- Main Navigation Menu -->
+      <nav class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+          <span class="link-icon">🏠</span> Home
+        </a>
+        <a class="sidebar-link {% if request.GET.type == 'LOST' %}active{% endif %}" href="{% url 'browse' %}?type=LOST">
+          <span class="link-icon">🔍</span> Lost Items
+        </a>
+        <a class="sidebar-link {% if request.GET.type == 'FOUND' %}active{% endif %}" href="{% url 'browse' %}?type=FOUND">
+          <span class="link-icon">📦</span> Found Items
+        </a>
+      </nav>
 
-    {% if user.is_authenticated %}
-    <nav class="sidebar-section">
-      <div class="sidebar-label">My Account</div>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-        <span class="link-icon">📊</span> Dashboard
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'my_reports' %}active{% endif %}" href="{% url 'my_reports' %}">
-        <span class="link-icon">📝</span> My Reports
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'my_claims' %}active{% endif %}" href="{% url 'my_claims' %}">
-        <span class="link-icon">✋</span> My Claims
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'potential_matches' %}active{% endif %}" href="{% url 'potential_matches' %}">
-        <span class="link-icon">🔗</span> Matches
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}">
-        <span class="link-icon">🔔</span> Notifications
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
-        <span class="link-icon">👤</span> Profile
-      </a>
-    </nav>
+      {% if user.is_authenticated %}
+      <!-- My Account Section -->
+      <nav class="sidebar-section">
+        <div class="sidebar-label">My Account</div>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+          <span class="link-icon">📊</span> Dashboard
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'my_reports' %}active{% endif %}" href="{% url 'my_reports' %}">
+          <span class="link-icon">📝</span> My Reports
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'my_claims' %}active{% endif %}" href="{% url 'my_claims' %}">
+          <span class="link-icon">✋</span> My Claims
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'potential_matches' %}active{% endif %}" href="{% url 'potential_matches' %}">
+          <span class="link-icon">🔗</span> Matches
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}">
+          <span class="link-icon">🔔</span> Notifications
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
+          <span class="link-icon">👤</span> Profile
+        </a>
+      </nav>
 
-    {% if user.is_superuser or user.profile.role == 'ADMIN' %}
-    <nav class="sidebar-section">
-      <div class="sidebar-label">Administration</div>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
-        <span class="link-icon">⚡</span> Admin Panel
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_reports' %}active{% endif %}" href="{% url 'manage_reports' %}">
-        <span class="link-icon">📋</span> Manage Reports
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_claims' %}active{% endif %}" href="{% url 'manage_claims' %}">
-        <span class="link-icon">✅</span> Manage Claims
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_users' %}active{% endif %}" href="{% url 'manage_users' %}">
-        <span class="link-icon">👥</span> Manage Users
-      </a>
-      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_taxonomy' %}active{% endif %}" href="{% url 'manage_taxonomy' %}">
-        <span class="link-icon">🏷️</span> Categories & Locations
-      </a>
-    </nav>
-    {% endif %}
+      {% if user.is_superuser or user.profile.role == 'ADMIN' %}
+      <!-- Administration Section -->
+      <nav class="sidebar-section">
+        <div class="sidebar-label">Administration</div>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+          <span class="link-icon">⚡</span> Admin Panel
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_reports' %}active{% endif %}" href="{% url 'manage_reports' %}">
+          <span class="link-icon">📋</span> Manage Reports
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_claims' %}active{% endif %}" href="{% url 'manage_claims' %}">
+          <span class="link-icon">✅</span> Manage Claims
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_users' %}active{% endif %}" href="{% url 'manage_users' %}">
+          <span class="link-icon">👥</span> Manage Users
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_taxonomy' %}active{% endif %}" href="{% url 'manage_taxonomy' %}">
+          <span class="link-icon">🏷️</span> Categories & Locations
+        </a>
+      </nav>
+      {% endif %}
 
-    <!-- Sidebar footer with user info -->
-    <div class="sidebar-footer">
-      <a class="sidebar-user" href="{% url 'profile' %}">
-        <span class="sidebar-avatar">{{ user.first_name|first|default:user.username|first|upper }}</span>
-        <span class="sidebar-user-info">
-          <span class="sidebar-user-name">{{ user.get_full_name|default:user.username }}</span>
-          <span class="sidebar-user-role">{{ user.profile.get_role_display|default:"Member" }}</span>
-        </span>
-      </a>
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button class="sidebar-logout" type="submit">🚪 Sign Out</button>
-      </form>
-    </div>
-    {% else %}
-    <div class="sidebar-footer">
-      <a class="sidebar-link" href="{% url 'login' %}">
-        <span class="link-icon">🔑</span> Sign In
-      </a>
-      <a class="sidebar-link" href="{% url 'register' %}" style="background:rgba(99,102,241,.15);color:#818cf8;font-weight:600;">
-        <span class="link-icon">✨</span> Register
-      </a>
-    </div>
-    {% endif %}
-  </aside>
+      <!-- Sidebar footer with user info -->
+      <div class="sidebar-footer">
+        <a class="sidebar-user" href="{% url 'profile' %}">
+          <span class="sidebar-avatar">{{ user.first_name|first|default:user.username|first|upper }}</span>
+          <span class="sidebar-user-info">
+            <span class="sidebar-user-name">{{ user.get_full_name|default:user.username }}</span>
+            <span class="sidebar-user-role">{{ user.profile.get_role_display|default:"Member" }}</span>
+          </span>
+        </a>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="sidebar-logout" type="submit">🚪 Sign Out</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="sidebar-footer">
+        <a class="sidebar-link" href="{% url 'login' %}">
+          <span class="link-icon">🔑</span> Sign In
+        </a>
+        <a class="sidebar-link" href="{% url 'register' %}" style="background:rgba(99,102,241,.15);color:#818cf8;font-weight:600;">
+          <span class="link-icon">✨</span> Register
+        </a>
+      </div>
+      {% endif %}
+    </aside>
 
-  <!-- ===== Main Content ===== -->
-  <main class="main-content">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-    {% block content %}{% endblock %}
-    <footer class="app-footer">Lovely Professional University · Lost & Found Management System</footer>
-  </main>
-</div>
+    <!-- ===== Main Content ===== -->
+    <main class="main-content">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+      <footer class="app-footer">Lovely Professional University · Lost & Found Management System</footer>
+    </main>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

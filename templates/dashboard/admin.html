@@ -1,100 +1,777 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard — LPU Lost & Found{% endblock %}
+{% block title %}Master Admin Command Center — LPU Lost & Found{% endblock %}
 {% block content %}
+
+<!-- Header & Quick Actions -->
 <div class="topbar">
   <div class="topbar-left">
-    <p class="eyebrow mb-1">Administration</p>
-    <h1>Admin Dashboard</h1>
+    <p class="eyebrow mb-1">Superuser Control Panel</p>
+    <h1>Master Admin Command Center</h1>
+    <p class="text-muted">Complete oversight, verification, user moderation & campus taxonomy management.</p>
   </div>
   <div class="topbar-actions">
-    <a class="btn btn-secondary" href="{% url 'manage_reports' %}">📋 Reports</a>
-    <a class="btn btn-primary" href="{% url 'manage_claims' %}">✅ Claims</a>
+    <a class="btn btn-secondary" href="{% url 'report_found' %}">+ Report Found</a>
+    <a class="btn btn-primary" href="{% url 'report_lost' %}">+ Report Lost</a>
+    <a class="btn btn-outline-primary" href="/admin/" target="_blank">Django Admin ↗</a>
   </div>
 </div>
 
-<!-- Admin Metric Cards -->
-<div class="metrics-grid">
-  <div class="metric-card gradient grad-blue">
-    <div class="metric-icon">👥</div>
-    <span class="metric-label">Total Users</span>
-    <div class="metric-value">{{ user_count }}</div>
-    <span class="metric-sub">Registered</span>
+<!-- Navigation Tabs -->
+<div class="admin-tab-nav">
+  <button type="button" class="admin-tab-btn {% if active_tab == 'overview' or not active_tab %}active{% endif %}" onclick="switchTab('overview')">
+    <span>📊</span> Overview
+  </button>
+  <button type="button" class="admin-tab-btn {% if active_tab == 'reports' %}active{% endif %}" onclick="switchTab('reports')">
+    <span>📋</span> All Reports <span class="badge-pill">{{ all_reports.count }}</span>
+  </button>
+  <button type="button" class="admin-tab-btn {% if active_tab == 'claims' %}active{% endif %}" onclick="switchTab('claims')">
+    <span>✋</span> Claims Verification <span class="badge-pill" style="background:rgba(245,158,11,.2);color:#b45309;">{{ pending_claims }} pending</span>
+  </button>
+  <button type="button" class="admin-tab-btn {% if active_tab == 'matches' %}active{% endif %}" onclick="switchTab('matches')">
+    <span>🔗</span> Smart Matches <span class="badge-pill">{{ match_count }}</span>
+  </button>
+  <button type="button" class="admin-tab-btn {% if active_tab == 'users' %}active{% endif %}" onclick="switchTab('users')">
+    <span>👥</span> Users & Roles <span class="badge-pill">{{ user_count }}</span>
+  </button>
+  <button type="button" class="admin-tab-btn {% if active_tab == 'taxonomy' %}active{% endif %}" onclick="switchTab('taxonomy')">
+    <span>🏷️</span> Campus Directory
+  </button>
+</div>
+
+<!-- ===================================================================
+     TAB 1: OVERVIEW & ANALYTICS
+     =================================================================== -->
+<div id="tab-overview" class="admin-tab-pane {% if active_tab == 'overview' or not active_tab %}active{% endif %}">
+  <!-- Key Metrics Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card gradient grad-blue">
+      <div class="metric-icon">👥</div>
+      <span class="metric-label">Total Users</span>
+      <div class="metric-value">{{ user_count }}</div>
+      <span class="metric-sub">Registered campus members</span>
+    </div>
+    <div class="metric-card gradient grad-orange">
+      <div class="metric-icon">🔍</div>
+      <span class="metric-label">Lost Reports</span>
+      <div class="metric-value">{{ lost_count }}</div>
+      <span class="metric-sub">Active lost item logs</span>
+    </div>
+    <div class="metric-card gradient grad-green">
+      <div class="metric-icon">📦</div>
+      <span class="metric-label">Found Reports</span>
+      <div class="metric-value">{{ found_count }}</div>
+      <span class="metric-sub">Handed in items</span>
+    </div>
+    <div class="metric-card gradient grad-purple">
+      <div class="metric-icon">⏳</div>
+      <span class="metric-label">Pending Reports</span>
+      <div class="metric-value">{{ pending_reports }}</div>
+      <span class="metric-sub">Awaiting moderation</span>
+    </div>
+    <div class="metric-card gradient grad-cyan">
+      <div class="metric-icon">✋</div>
+      <span class="metric-label">Pending Claims</span>
+      <div class="metric-value">{{ pending_claims }}</div>
+      <span class="metric-sub">Ownership verifications</span>
+    </div>
+    <div class="metric-card gradient grad-pink">
+      <div class="metric-icon">🎉</div>
+      <span class="metric-label">Total Recovered</span>
+      <div class="metric-value">{{ recovered_count }}</div>
+      <span class="metric-sub">Successfully returned</span>
+    </div>
   </div>
-  <div class="metric-card gradient grad-orange">
-    <div class="metric-icon">🔍</div>
-    <span class="metric-label">Lost Items</span>
-    <div class="metric-value">{{ lost_count }}</div>
-    <span class="metric-sub">Reports</span>
+
+  <!-- Analytics & Activity Grid -->
+  <div class="two-col mb-4">
+    <!-- Top Categories -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>📊 Items by Category</h3>
+        <span class="pill pill-approved">{{ all_categories.count }} categories</span>
+      </div>
+      <div class="panel-body no-pad">
+        {% for cat in top_categories %}
+        <div class="notif-row">
+          <span class="notif-dot" style="background:var(--accent-purple);box-shadow:0 0 0 4px rgba(139,92,246,.15);"></span>
+          <span class="notif-content" style="flex:1;">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>{{ cat.name }}</strong>
+              <span class="pill pill-closed">{{ cat.total }} reports</span>
+            </div>
+          </span>
+        </div>
+        {% empty %}
+        <div class="empty-state">No categories defined yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Top Locations -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>📍 Common Campus Locations</h3>
+        <span class="pill pill-recovered">{{ all_locations.count }} areas</span>
+      </div>
+      <div class="panel-body no-pad">
+        {% for loc in top_locations %}
+        <div class="notif-row">
+          <span class="notif-dot" style="background:var(--accent-cyan);box-shadow:0 0 0 4px rgba(6,182,212,.15);"></span>
+          <span class="notif-content" style="flex:1;">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>{{ loc }}</strong>
+              <span class="pill pill-closed">{{ loc.total }} reports</span>
+            </div>
+          </span>
+        </div>
+        {% empty %}
+        <div class="empty-state">No location data yet.</div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
-  <div class="metric-card gradient grad-green">
-    <div class="metric-icon">📦</div>
-    <span class="metric-label">Found Items</span>
-    <div class="metric-value">{{ found_count }}</div>
-    <span class="metric-sub">Reports</span>
-  </div>
-  <div class="metric-card gradient grad-purple">
-    <div class="metric-icon">⏳</div>
-    <span class="metric-label">Pending Reports</span>
-    <div class="metric-value">{{ pending_reports }}</div>
-    <span class="metric-sub">Moderation</span>
-  </div>
-  <div class="metric-card gradient grad-cyan">
-    <div class="metric-icon">✋</div>
-    <span class="metric-label">Pending Claims</span>
-    <div class="metric-value">{{ pending_claims }}</div>
-    <span class="metric-sub">Verification</span>
-  </div>
-  <div class="metric-card gradient grad-pink">
-    <div class="metric-icon">✅</div>
-    <span class="metric-label">Recovered</span>
-    <div class="metric-value">{{ recovered_count }}</div>
-    <span class="metric-sub">Completed</span>
+
+  <!-- Recent Recoveries & Notifications -->
+  <div class="two-col">
+    <!-- Verified Handover Records -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>🎉 Recent Handover Records</h3>
+      </div>
+      <div class="panel-body no-pad">
+        {% for rec in recent_recoveries %}
+        <div class="notif-row">
+          <span class="notif-dot" style="background:var(--accent-green);box-shadow:0 0 0 4px rgba(16,185,129,.15);"></span>
+          <span class="notif-content">
+            <strong>{{ rec.report.item_name }}</strong>
+            <small>Owner: <strong>{{ rec.owner.username }}</strong> · Verified by: {{ rec.verified_by.username }}</small>
+            <small class="text-muted">{{ rec.handover_date|date:"M d, Y H:i" }}</small>
+          </span>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+          <div class="empty-icon">🤝</div>
+          <strong>No handovers completed yet</strong>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent System Notifications -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>🔔 System Activity & Notifications</h3>
+      </div>
+      <div class="panel-body no-pad">
+        {% for n in recent_notifications %}
+        <div class="notif-row">
+          <span class="notif-dot"></span>
+          <span class="notif-content">
+            <strong>{{ n.message }}</strong>
+            <small>Recipient: <strong>{{ n.recipient.username }}</strong> · {{ n.created_at|timesince }} ago</small>
+          </span>
+        </div>
+        {% empty %}
+        <div class="empty-state">No recent activity.</div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Analytics Panels -->
-<div class="two-col">
-  <div class="panel">
+<!-- ===================================================================
+     TAB 2: ALL REPORTS (LOST & FOUND MANAGEMENT)
+     =================================================================== -->
+<div id="tab-reports" class="admin-tab-pane {% if active_tab == 'reports' %}active{% endif %}">
+  <!-- Filter & Search Toolbar -->
+  <div class="admin-filter-bar">
+    <div class="admin-search-wrap">
+      <span class="admin-search-icon">🔍</span>
+      <input type="text" class="admin-search-input" id="reportSearch" placeholder="Search by item, reporter, category, location..." onkeyup="filterReportsTable()">
+    </div>
+    <div class="d-flex gap-2">
+      <select class="form-select form-select-sm" id="reportStatusFilter" onchange="filterReportsTable()" style="min-width:140px;">
+        <option value="">All Statuses</option>
+        <option value="PENDING">Pending</option>
+        <option value="APPROVED">Approved</option>
+        <option value="RECOVERED">Recovered</option>
+        <option value="REJECTED">Rejected</option>
+        <option value="CLOSED">Closed</option>
+      </select>
+      <select class="form-select form-select-sm" id="reportTypeFilter" onchange="filterReportsTable()" style="min-width:120px;">
+        <option value="">All Types</option>
+        <option value="LOST">Lost Only</option>
+        <option value="FOUND">Found Only</option>
+      </select>
+    </div>
+    <span class="pill pill-closed" id="reportMatchCounter">{{ all_reports.count }} reports total</span>
+  </div>
+
+  <!-- Reports Table with Expandable Row Drawers -->
+  <div class="master-table-card">
+    <table class="master-table" id="reportsTable">
+      <thead>
+        <tr>
+          <th style="width:40px;"></th>
+          <th style="width:50px;">Photo</th>
+          <th>Item &amp; Category</th>
+          <th>Type</th>
+          <th>Reporter</th>
+          <th>Campus Location</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th style="min-width:280px;">Review Action</th>
+          <th style="width:50px;">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in all_reports %}
+        <tr class="report-row-item" data-type="{{ report.report_type }}" data-status="{{ report.status }}">
+          <td>
+            <button type="button" class="btn btn-sm btn-secondary" style="padding:4px 8px;" onclick="toggleDrawer('drawer-{{ report.pk }}', this)" title="Expand details">▼</button>
+          </td>
+          <td>
+            {% if report.images.first %}
+              <img src="{{ report.images.first.image.url }}" class="item-thumb-sm" alt="{{ report.item_name }}">
+            {% else %}
+              <div class="item-thumb-sm">📦</div>
+            {% endif %}
+          </td>
+          <td>
+            <strong>{{ report.item_name }}</strong><br>
+            <small class="text-muted">{{ report.category.name }} · {{ report.color|default:"No color" }}</small>
+          </td>
+          <td>
+            <span class="pill {% if report.report_type == 'LOST' %}pill-rejected{% else %}pill-approved{% endif %}">
+              {% if report.report_type == 'LOST' %}🔍 Lost{% else %}📦 Found{% endif %}
+            </span>
+          </td>
+          <td>
+            <strong>{{ report.user.username }}</strong><br>
+            <small class="text-muted">{{ report.user.email|default:"No email" }}</small>
+          </td>
+          <td>
+            <span>{{ report.campus_location }}</span>
+          </td>
+          <td>
+            <small>{{ report.date_occurrence|date:"d M Y" }}</small>
+          </td>
+          <td>
+            <span class="pill pill-{{ report.status|lower }}">{{ report.get_status_display }}</span>
+          </td>
+          <td>
+            <form method="post" class="admin-action-form">
+              {% csrf_token %}
+              <input type="hidden" name="action_type" value="update_report">
+              <input type="hidden" name="report_id" value="{{ report.pk }}">
+              <select name="action" class="admin-action-select">
+                <option value="APPROVED" {% if report.status == 'APPROVED' %}selected{% endif %}>✅ Approve</option>
+                <option value="PENDING" {% if report.status == 'PENDING' %}selected{% endif %}>⏳ Pending</option>
+                <option value="RECOVERED" {% if report.status == 'RECOVERED' %}selected{% endif %}>🎉 Recovered</option>
+                <option value="REJECTED" {% if report.status == 'REJECTED' %}selected{% endif %}>❌ Reject</option>
+                <option value="CLOSED" {% if report.status == 'CLOSED' %}selected{% endif %}>🔒 Close</option>
+              </select>
+              <input type="text" name="remarks" class="admin-action-input" placeholder="Admin remarks..." value="{{ report.review_remarks|default:'' }}">
+              <button class="btn btn-sm btn-primary" type="submit">Save</button>
+            </form>
+          </td>
+          <td>
+            <form method="post" onsubmit="return confirm('Permanently delete report \'{{ report.item_name|escapejs }}\'?');">
+              {% csrf_token %}
+              <input type="hidden" name="action_type" value="delete_report">
+              <input type="hidden" name="target_report_id" value="{{ report.pk }}">
+              <button class="btn-delete-icon" type="submit" title="Delete report">🗑️</button>
+            </form>
+          </td>
+        </tr>
+
+        <!-- Expandable Detail Drawer for Report -->
+        <tr id="drawer-{{ report.pk }}" class="detail-drawer" style="display:none;">
+          <td colspan="10">
+            <div class="detail-drawer-grid">
+              <div class="detail-drawer-field">
+                <label>Full Description</label>
+                <p>{{ report.description|default:"No description provided." }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Identifying Details <span class="private-badge">🔒 Private / Proof</span></label>
+                <p style="color:#b91c1c;font-weight:600;">{{ report.identifying_details|default:"None specified." }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Custody / Current Location</label>
+                <p>{{ report.custody|default:"With reporter" }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Occurrence Time</label>
+                <p>{{ report.approximate_time|default:"Approximate time not specified" }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Brand &amp; Color</label>
+                <p>Brand: {{ report.brand|default:"N/A" }} | Color: {{ report.color }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Reporter Contact</label>
+                <p>Phone: {{ report.user.profile.phone|default:"Not provided" }} | Role: {{ report.user.profile.get_role_display }}</p>
+              </div>
+            </div>
+
+            <!-- Uploaded Photos Strip -->
+            {% if report.images.all %}
+            <div style="margin-top:12px;">
+              <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-muted);">Uploaded Photos ({{ report.images.count }})</label>
+              <div class="drawer-photos-strip">
+                {% for img in report.images.all %}
+                  <a href="{{ img.image.url }}" target="_blank" title="View full image">
+                    <img src="{{ img.image.url }}" alt="{{ report.item_name }}">
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Associated Claims -->
+            {% if report.claims.all %}
+            <div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);">
+              <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-muted);">Claims on this Item ({{ report.claims.count }})</label>
+              {% for c in report.claims.all %}
+              <div class="d-flex justify-content-between align-items-center mt-2 p-2 rounded" style="background:#fff;border:1px solid var(--line);">
+                <div>
+                  <strong>Claimant: {{ c.claimant.username }}</strong> ({{ c.claimant.email }})
+                  <p class="mb-0 text-muted" style="font-size:12px;">Proof: "{{ c.verification_answers|truncatechars:120 }}"</p>
+                </div>
+                <span class="pill pill-{{ c.status|lower }}">{{ c.status }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10" class="empty-state">No reports submitted yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================================================================
+     TAB 3: CLAIMS VERIFICATION
+     =================================================================== -->
+<div id="tab-claims" class="admin-tab-pane {% if active_tab == 'claims' %}active{% endif %}">
+  <!-- Filter & Search Toolbar -->
+  <div class="admin-filter-bar">
+    <div class="admin-search-wrap">
+      <span class="admin-search-icon">🔍</span>
+      <input type="text" class="admin-search-input" id="claimSearch" placeholder="Search claimant, item name, answers..." onkeyup="filterClaimsTable()">
+    </div>
+    <select class="form-select form-select-sm" id="claimStatusFilter" onchange="filterClaimsTable()" style="max-width:180px;">
+      <option value="">All Claim Statuses</option>
+      <option value="PENDING" selected>Pending Only</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REJECTED">Rejected</option>
+    </select>
+    <span class="pill pill-closed">{{ all_claims.count }} total claims</span>
+  </div>
+
+  <div class="master-table-card">
+    <table class="master-table" id="claimsTable">
+      <thead>
+        <tr>
+          <th>Target Found Item</th>
+          <th>Claimant</th>
+          <th>Contact</th>
+          <th>Date Submitted</th>
+          <th>Verification Answers / Proof</th>
+          <th>Evidence</th>
+          <th>Status</th>
+          <th style="min-width:280px;">Review Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for claim in all_claims %}
+        <tr class="claim-row-item" data-status="{{ claim.status }}">
+          <td>
+            <strong>{{ claim.report.item_name }}</strong><br>
+            <small class="text-muted">{{ claim.report.category.name }} · {{ claim.report.campus_location }}</small><br>
+            <a href="{% url 'item_detail' claim.report.pk %}" target="_blank" class="small text-primary">View item record ↗</a>
+          </td>
+          <td>
+            <strong>{{ claim.claimant.username }}</strong><br>
+            <small>{{ claim.claimant.get_full_name|default:"-" }}</small>
+          </td>
+          <td>
+            <small>{{ claim.claimant.email }}</small><br>
+            <small class="text-muted">📞 {{ claim.claimant.profile.phone|default:"No phone" }}</small>
+          </td>
+          <td>
+            <small>{{ claim.created_at|date:"d M Y H:i" }}</small>
+          </td>
+          <td style="max-width:320px;">
+            <div style="max-height:85px;overflow-y:auto;background:#fff;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);font-size:12px;line-height:1.4;">
+              {{ claim.verification_answers }}
+            </div>
+          </td>
+          <td>
+            {% if claim.evidence %}
+              <a href="{{ claim.evidence.url }}" target="_blank" class="btn btn-sm btn-secondary">📎 View File</a>
+            {% else %}
+              <span class="text-muted small">None</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="pill pill-{{ claim.status|lower }}">{{ claim.status|title }}</span>
+          </td>
+          <td>
+            <form method="post" class="admin-action-form">
+              {% csrf_token %}
+              <input type="hidden" name="action_type" value="update_claim">
+              <input type="hidden" name="claim_id" value="{{ claim.pk }}">
+              <select name="action" class="admin-action-select">
+                <option value="APPROVED" {% if claim.status == 'APPROVED' %}selected{% endif %}>✅ Approve (Handover)</option>
+                <option value="PENDING" {% if claim.status == 'PENDING' %}selected{% endif %}>⏳ Pending</option>
+                <option value="REJECTED" {% if claim.status == 'REJECTED' %}selected{% endif %}>❌ Reject</option>
+              </select>
+              <input type="text" name="remarks" class="admin-action-input" placeholder="Admin remarks..." value="{{ claim.admin_remarks|default:'' }}">
+              <button class="btn btn-sm btn-primary" type="submit">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="empty-state">No ownership claims submitted.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================================================================
+     TAB 4: SMART MATCHES MONITOR
+     =================================================================== -->
+<div id="tab-matches" class="admin-tab-pane {% if active_tab == 'matches' %}active{% endif %}">
+  <div class="panel mb-4">
     <div class="panel-header">
       <div>
-        <span class="eyebrow">Analytics</span>
-        <h3 style="margin-top:4px;">📊 Frequent Categories</h3>
+        <h3>🔗 AI &amp; RapidFuzz Match Scores</h3>
+        <p class="text-muted mb-0" style="font-size:13px;">Automated candidate matching between approved Lost &amp; Found reports.</p>
       </div>
-    </div>
-    <div class="panel-body no-pad">
-      {% for category in top_categories %}
-      <div class="notif-row">
-        <span class="notif-dot" style="background:var(--accent-purple);box-shadow:0 0 0 4px rgba(139,92,246,.15);"></span>
-        <span class="notif-content">
-          <strong>{{ category.name }}</strong>
-          <small>{{ category.total }} reports</small>
-        </span>
-      </div>
-      {% empty %}
-      <div class="empty-state"><strong>No category data</strong></div>
-      {% endfor %}
+      <span class="pill pill-match">{{ match_count }} potential pairs</span>
     </div>
   </div>
-  <div class="panel">
-    <div class="panel-header">
-      <div>
-        <span class="eyebrow">Locations</span>
-        <h3 style="margin-top:4px;">📍 Common Areas</h3>
+
+  <div class="master-table-card">
+    <table class="master-table">
+      <thead>
+        <tr>
+          <th style="width:110px;">Match Score</th>
+          <th>Lost Report</th>
+          <th>Lost Reporter</th>
+          <th>Found Report</th>
+          <th>Found Finder</th>
+          <th>Category &amp; Location</th>
+          <th>Match Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in all_matches %}
+        <tr>
+          <td>
+            <span class="pill {% if match.score >= 80 %}pill-approved{% elif match.score >= 60 %}pill-pending{% else %}pill-match{% endif %}" style="font-size:13px;font-weight:800;">
+              ⚡ {{ match.score }}%
+            </span>
+          </td>
+          <td>
+            <strong>{{ match.lost_report.item_name }}</strong><br>
+            <small class="text-muted">Lost on {{ match.lost_report.date_occurrence }}</small>
+          </td>
+          <td>
+            <strong>{{ match.lost_report.user.username }}</strong><br>
+            <small class="text-muted">{{ match.lost_report.user.email }}</small>
+          </td>
+          <td>
+            <strong>{{ match.found_report.item_name }}</strong><br>
+            <small class="text-muted">Found on {{ match.found_report.date_occurrence }}</small>
+          </td>
+          <td>
+            <strong>{{ match.found_report.user.username }}</strong><br>
+            <small class="text-muted">{{ match.found_report.user.email }}</small>
+          </td>
+          <td>
+            <span>{{ match.found_report.category.name }}</span><br>
+            <small class="text-muted">{{ match.found_report.campus_location }}</small>
+          </td>
+          <td>
+            <small>{{ match.created_at|date:"d M Y" }}</small>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'item_detail' match.found_report.pk %}" target="_blank" class="btn btn-sm btn-secondary">Review Found</a>
+              <a href="{% url 'item_detail' match.lost_report.pk %}" target="_blank" class="btn btn-sm btn-outline-primary">Review Lost</a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="empty-state">
+            <div class="empty-icon">🔗</div>
+            <strong>No match pairs scored yet</strong>
+            <span>As approved lost and found reports are submitted, similarity matches will appear here automatically.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================================================================
+     TAB 5: USERS DIRECTORY & ROLES
+     =================================================================== -->
+<div id="tab-users" class="admin-tab-pane {% if active_tab == 'users' %}active{% endif %}">
+  <!-- Search Toolbar -->
+  <div class="admin-filter-bar">
+    <div class="admin-search-wrap">
+      <span class="admin-search-icon">🔍</span>
+      <input type="text" class="admin-search-input" id="userSearch" placeholder="Search by username, full name, email..." onkeyup="filterUsersTable()">
+    </div>
+    <span class="pill pill-closed">{{ user_count }} registered users</span>
+  </div>
+
+  <div class="master-table-card">
+    <table class="master-table" id="usersTable">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Full Name</th>
+          <th>Email Address</th>
+          <th>Phone</th>
+          <th>Activity</th>
+          <th>Joined</th>
+          <th style="min-width:260px;">Role &amp; Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in all_users %}
+        <tr class="user-row-item">
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="sidebar-avatar" style="width:32px;height:32px;font-size:12px;">{{ u.username|first|upper }}</div>
+              <div>
+                <strong>{{ u.username }}</strong>
+                {% if u.is_superuser %}<span class="badge bg-dark ms-1" style="font-size:9px;">SUPERUSER</span>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td>{{ u.get_full_name|default:"-" }}</td>
+          <td>{{ u.email|default:"-" }}</td>
+          <td>{{ u.profile.phone|default:"-" }}</td>
+          <td>
+            <small><strong>{{ u.reports_total }}</strong> reports · <strong>{{ u.claims_total }}</strong> claims</small>
+          </td>
+          <td><small>{{ u.date_joined|date:"d M Y" }}</small></td>
+          <td>
+            <form method="post" class="d-flex align-items-center gap-2">
+              {% csrf_token %}
+              <input type="hidden" name="action_type" value="update_user">
+              <input type="hidden" name="user_id" value="{{ u.pk }}">
+              <select name="role" class="form-select form-select-sm" style="min-width:130px;min-height:36px;">
+                <option value="STUDENT" {% if u.profile.role == 'STUDENT' %}selected{% endif %}>Student</option>
+                <option value="FACULTY" {% if u.profile.role == 'FACULTY' %}selected{% endif %}>Faculty / Staff</option>
+                <option value="ADMIN" {% if u.profile.role == 'ADMIN' %}selected{% endif %}>Administrator</option>
+              </select>
+              <label class="d-flex align-items-center gap-1 mb-0" style="font-size:12px;cursor:pointer;">
+                <input type="checkbox" name="is_active" {% if u.is_active %}checked{% endif %} class="form-check-input"> Active
+              </label>
+              <button class="btn btn-sm btn-primary" type="submit">Save</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================================================================
+     TAB 6: CAMPUS TAXONOMY (CATEGORIES & LOCATIONS)
+     =================================================================== -->
+<div id="tab-taxonomy" class="admin-tab-pane {% if active_tab == 'taxonomy' %}active{% endif %}">
+  <div class="two-col">
+    <!-- Categories Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>📂 Manage Item Categories</h3>
+        <span class="pill pill-approved">{{ all_categories.count }} Categories</span>
+      </div>
+      <div class="panel-body">
+        <!-- Add Category Form -->
+        <form method="post" class="d-flex gap-2 mb-3">
+          {% csrf_token %}
+          <input type="hidden" name="action_type" value="taxonomy">
+          <input type="hidden" name="kind" value="category">
+          <input type="text" name="name" class="form-control" placeholder="New category name (e.g. Wallets)..." required>
+          <button class="btn btn-primary" type="submit">+ Add</button>
+        </form>
+
+        <div style="max-height:450px;overflow-y:auto;">
+          {% for cat in all_categories %}
+          <div class="list-row" style="grid-template-columns:44px 1fr auto;padding:10px 8px;">
+            <span class="list-row-icon default">🏷️</span>
+            <span class="list-row-info">
+              <strong>{{ cat.name }}</strong>
+            </span>
+            <span class="pill pill-closed">{{ cat.total }} items</span>
+          </div>
+          {% empty %}
+          <div class="empty-state">No categories created yet.</div>
+          {% endfor %}
+        </div>
       </div>
     </div>
-    <div class="panel-body no-pad">
-      {% for location in top_locations %}
-      <div class="notif-row">
-        <span class="notif-dot" style="background:var(--accent-cyan);box-shadow:0 0 0 4px rgba(6,182,212,.15);"></span>
-        <span class="notif-content">
-          <strong>{{ location }}</strong>
-          <small>{{ location.total }} reports</small>
-        </span>
+
+    <!-- Campus Locations Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>📍 Manage Campus Locations</h3>
+        <span class="pill pill-recovered">{{ all_locations.count }} Locations</span>
       </div>
-      {% empty %}
-      <div class="empty-state"><strong>No location data</strong></div>
-      {% endfor %}
+      <div class="panel-body">
+        <!-- Add Location Form -->
+        <form method="post" class="mb-3">
+          {% csrf_token %}
+          <input type="hidden" name="action_type" value="taxonomy">
+          <input type="hidden" name="kind" value="location">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <input class="form-control" name="building" required placeholder="Building (e.g. Block 32)">
+            <input class="form-control" name="block" placeholder="Block / Wing">
+            <input class="form-control" name="floor" placeholder="Floor (e.g. 2nd Floor)">
+            <input class="form-control" name="specific_location" required placeholder="Specific area (e.g. Lab 204)">
+          </div>
+          <button class="btn btn-primary w-100" type="submit">+ Add Campus Location</button>
+        </form>
+
+        <div style="max-height:400px;overflow-y:auto;">
+          {% for loc in all_locations %}
+          <div class="list-row" style="grid-template-columns:44px 1fr auto;padding:10px 8px;">
+            <span class="list-row-icon" style="background:rgba(6,182,212,.1);color:var(--accent-cyan);">📍</span>
+            <span class="list-row-info">
+              <strong>{{ loc }}</strong>
+              <small class="text-muted">{{ loc.building }} · Floor: {{ loc.floor|default:"-" }}</small>
+            </span>
+            <span class="pill pill-closed">{{ loc.total }} items</span>
+          </div>
+          {% empty %}
+          <div class="empty-state">No locations created yet.</div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- ===================================================================
+     INTERACTIVE JAVASCRIPT: TAB SWITCHER & LIVE FILTERS
+     =================================================================== -->
+<script>
+function switchTab(tabName) {
+  // Update Tab Buttons
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-pane').forEach(pane => pane.classList.remove('active'));
+
+  const activeBtn = Array.from(document.querySelectorAll('.admin-tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const activePane = document.getElementById('tab-' + tabName);
+  if (activePane) activePane.classList.add('active');
+
+  // Update browser URL without reload
+  const url = new URL(window.location);
+  url.searchParams.set('tab', tabName);
+  window.history.pushState({}, '', url);
+}
+
+function toggleDrawer(drawerId, btn) {
+  const drawer = document.getElementById(drawerId);
+  if (!drawer) return;
+  if (drawer.style.display === 'none' || !drawer.style.display) {
+    drawer.style.display = 'table-row';
+    btn.innerHTML = '▲';
+  } else {
+    drawer.style.display = 'none';
+    btn.innerHTML = '▼';
+  }
+}
+
+function filterReportsTable() {
+  const query = (document.getElementById('reportSearch').value || '').toLowerCase();
+  const statusFilter = document.getElementById('reportStatusFilter').value;
+  const typeFilter = document.getElementById('reportTypeFilter').value;
+  const rows = document.querySelectorAll('#reportsTable tbody tr.report-row-item');
+
+  let visibleCount = 0;
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const type = row.getAttribute('data-type');
+    const status = row.getAttribute('data-status');
+    const drawerId = row.querySelector('button') ? row.querySelector('button').getAttribute('onclick') : null;
+
+    const matchesQuery = !query || text.includes(query);
+    const matchesStatus = !statusFilter || status === statusFilter;
+    const matchesType = !typeFilter || type === typeFilter;
+
+    if (matchesQuery && matchesStatus && matchesType) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+      // also hide its drawer if open
+      const match = drawerId && drawerId.match(/'(drawer-\d+)'/);
+      if (match) {
+        const d = document.getElementById(match[1]);
+        if (d) d.style.display = 'none';
+      }
+    }
+  });
+
+  const counter = document.getElementById('reportMatchCounter');
+  if (counter) counter.innerText = visibleCount + ' matching reports';
+}
+
+function filterClaimsTable() {
+  const query = (document.getElementById('claimSearch').value || '').toLowerCase();
+  const statusFilter = document.getElementById('claimStatusFilter').value;
+  const rows = document.querySelectorAll('#claimsTable tbody tr.claim-row-item');
+
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const status = row.getAttribute('data-status');
+    const matchesQuery = !query || text.includes(query);
+    const matchesStatus = !statusFilter || status === statusFilter;
+
+    row.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+  });
+}
+
+function filterUsersTable() {
+  const query = (document.getElementById('userSearch').value || '').toLowerCase();
+  const rows = document.querySelectorAll('#usersTable tbody tr.user-row-item');
+
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = (!query || text.includes(query)) ? '' : 'none';
+  });
+}
+
+// On page load, respect the URL param ?tab=...
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab');
+  if (tab) switchTab(tab);
+});
+</script>
+
 {% endblock %}
