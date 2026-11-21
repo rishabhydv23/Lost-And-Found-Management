@@ -1,2 +1,28 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Updates</p><h2>Notifications</h2></div></div>{% for notification in notifications %}<div class="notification-card {% if not notification.read %}unread{% endif %}"><div><strong>{{ notification.message }}</strong><br><small class="text-muted">{{ notification.created_at|date:'M d, Y H:i' }}</small></div>{% if not notification.read %}<a class="btn btn-sm btn-outline-primary" href="{% url 'mark_notification_read' notification.pk %}">Mark read</a>{% endif %}</div>{% empty %}<div class="card empty-state">No notifications.</div>{% endfor %}{% endblock %}
+{% block title %}Notifications — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Updates</p>
+    <h1>🔔 Notifications</h1>
+  </div>
+</div>
+
+{% for notification in notifications %}
+<div class="notification-card {% if not notification.read %}unread{% endif %}">
+  <div>
+    <strong>{{ notification.message }}</strong><br>
+    <small style="color:var(--ink-muted);">{{ notification.created_at|date:'M d, Y H:i' }}</small>
+  </div>
+  {% if not notification.read %}
+  <a class="btn btn-sm btn-primary" href="{% url 'mark_notification_read' notification.pk %}">✓ Mark Read</a>
+  {% endif %}
+</div>
+{% empty %}
+<div class="panel empty-state">
+  <div class="empty-icon">✨</div>
+  <strong>No notifications</strong>
+  <span>You're all caught up!</span>
+</div>
+{% endfor %}
+{% endblock %}

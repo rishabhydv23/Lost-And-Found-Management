@@ -1,2 +1,39 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Verification</p><h2>Manage claims</h2></div></div>{% for claim in claims %}<div class="card management-card"><div class="d-flex justify-content-between"><h5>{{ claim.report.item_name }} — {{ claim.claimant.username }}</h5><span class="status-pill status-{{ claim.status|lower }}">{{ claim.status|title }}</span></div><p class="text-muted">{{ claim.verification_answers }}</p>{% if claim.evidence %}<a class="small" href="{{ claim.evidence.url }}">View evidence</a>{% endif %}<form method="post" class="row g-2 mt-3">{% csrf_token %}<input type="hidden" name="claim_id" value="{{ claim.pk }}"><div class="col-md-3"><select class="form-select" name="action"><option value="APPROVED">Approve</option><option value="REJECTED">Reject</option></select></div><div class="col-md-7"><input class="form-control" name="remarks" placeholder="Admin remarks"></div><div class="col-md-2"><button class="btn btn-primary w-100">Update</button></div></form></div>{% empty %}<div class="card empty-state">No claims to review.</div>{% endfor %}{% endblock %}
+{% block title %}Manage Claims — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Verification</p>
+    <h1>✅ Manage Claims</h1>
+  </div>
+</div>
+
+{% for claim in claims %}
+<div class="mgmt-card">
+  <div class="d-flex justify-content-between align-items-center" style="margin-bottom:8px;">
+    <h5 style="margin:0;">{{ claim.report.item_name }} — {{ claim.claimant.username }}</h5>
+    <span class="pill pill-{{ claim.status|lower }}">{{ claim.status|title }}</span>
+  </div>
+  <p style="color:var(--ink-secondary);font-size:14px;margin:4px 0 12px;padding:10px 14px;background:#f8f9fb;border-radius:var(--radius-sm);">{{ claim.verification_answers }}</p>
+  {% if claim.evidence %}
+  <a class="btn btn-sm btn-secondary" href="{{ claim.evidence.url }}" style="margin-bottom:12px;">📎 View Evidence</a>
+  {% endif %}
+  <form method="post" style="display:grid;grid-template-columns:1fr 2.5fr auto;gap:10px;align-items:center;">
+    {% csrf_token %}
+    <input type="hidden" name="claim_id" value="{{ claim.pk }}">
+    <select class="form-select" name="action" style="min-height:40px;">
+      <option value="APPROVED">✅ Approve</option>
+      <option value="REJECTED">❌ Reject</option>
+    </select>
+    <input class="form-control" name="remarks" placeholder="Admin remarks..." style="min-height:40px;">
+    <button class="btn btn-primary btn-sm">Update</button>
+  </form>
+</div>
+{% empty %}
+<div class="panel empty-state">
+  <div class="empty-icon">✅</div>
+  <strong>No claims to review</strong>
+  <span>All caught up!</span>
+</div>
+{% endfor %}
+{% endblock %}

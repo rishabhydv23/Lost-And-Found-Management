@@ -1,6 +1,100 @@
 {% extends 'base.html' %}
+{% block title %}Admin Dashboard — LPU Lost & Found{% endblock %}
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow mb-1">Administration</p><h2>Administrator dashboard</h2></div><div class="d-flex gap-2"><a class="btn btn-outline-primary" href="{% url 'manage_reports' %}">Reports</a><a class="btn btn-primary" href="{% url 'manage_claims' %}">Claims</a></div></div>
-<div class="row g-3 mb-4"><div class="col-6 col-lg-2"><div class="metric-card"><span>Total users</span><strong>{{ user_count }}</strong><small>Registered</small></div></div><div class="col-6 col-lg-2"><div class="metric-card"><span>Lost items</span><strong>{{ lost_count }}</strong><small>Reports</small></div></div><div class="col-6 col-lg-2"><div class="metric-card"><span>Found items</span><strong>{{ found_count }}</strong><small>Reports</small></div></div><div class="col-6 col-lg-2"><div class="metric-card accent-purple"><span>Pending reports</span><strong>{{ pending_reports }}</strong><small>Moderation</small></div></div><div class="col-6 col-lg-2"><div class="metric-card accent-green"><span>Pending claims</span><strong>{{ pending_claims }}</strong><small>Verification</small></div></div><div class="col-6 col-lg-2"><div class="metric-card"><span>Recovered</span><strong>{{ recovered_count }}</strong><small>Completed</small></div></div></div>
-<div class="row g-4"><div class="col-md-6"><div class="card dashboard-panel"><div class="panel-heading"><div><p class="eyebrow mb-1">Analytics</p><h5 class="mb-0">Frequent categories</h5></div></div>{% for category in top_categories %}<div class="notification-row"><span class="notification-dot"></span><div><strong>{{ category.name }}</strong><small>{{ category.total }} reports</small></div></div>{% empty %}<div class="empty-state">No category data.</div>{% endfor %}</div></div><div class="col-md-6"><div class="card dashboard-panel"><div class="panel-heading"><div><p class="eyebrow mb-1">Locations</p><h5 class="mb-0">Common areas</h5></div></div>{% for location in top_locations %}<div class="notification-row"><span class="notification-dot"></span><div><strong>{{ location }}</strong><small>{{ location.total }} reports</small></div></div>{% empty %}<div class="empty-state">No location data.</div>{% endfor %}</div></div></div>
+<div class="topbar">
+  <div class="topbar-left">
+    <p class="eyebrow mb-1">Administration</p>
+    <h1>Admin Dashboard</h1>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{% url 'manage_reports' %}">📋 Reports</a>
+    <a class="btn btn-primary" href="{% url 'manage_claims' %}">✅ Claims</a>
+  </div>
+</div>
+
+<!-- Admin Metric Cards -->
+<div class="metrics-grid">
+  <div class="metric-card gradient grad-blue">
+    <div class="metric-icon">👥</div>
+    <span class="metric-label">Total Users</span>
+    <div class="metric-value">{{ user_count }}</div>
+    <span class="metric-sub">Registered</span>
+  </div>
+  <div class="metric-card gradient grad-orange">
+    <div class="metric-icon">🔍</div>
+    <span class="metric-label">Lost Items</span>
+    <div class="metric-value">{{ lost_count }}</div>
+    <span class="metric-sub">Reports</span>
+  </div>
+  <div class="metric-card gradient grad-green">
+    <div class="metric-icon">📦</div>
+    <span class="metric-label">Found Items</span>
+    <div class="metric-value">{{ found_count }}</div>
+    <span class="metric-sub">Reports</span>
+  </div>
+  <div class="metric-card gradient grad-purple">
+    <div class="metric-icon">⏳</div>
+    <span class="metric-label">Pending Reports</span>
+    <div class="metric-value">{{ pending_reports }}</div>
+    <span class="metric-sub">Moderation</span>
+  </div>
+  <div class="metric-card gradient grad-cyan">
+    <div class="metric-icon">✋</div>
+    <span class="metric-label">Pending Claims</span>
+    <div class="metric-value">{{ pending_claims }}</div>
+    <span class="metric-sub">Verification</span>
+  </div>
+  <div class="metric-card gradient grad-pink">
+    <div class="metric-icon">✅</div>
+    <span class="metric-label">Recovered</span>
+    <div class="metric-value">{{ recovered_count }}</div>
+    <span class="metric-sub">Completed</span>
+  </div>
+</div>
+
+<!-- Analytics Panels -->
+<div class="two-col">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Analytics</span>
+        <h3 style="margin-top:4px;">📊 Frequent Categories</h3>
+      </div>
+    </div>
+    <div class="panel-body no-pad">
+      {% for category in top_categories %}
+      <div class="notif-row">
+        <span class="notif-dot" style="background:var(--accent-purple);box-shadow:0 0 0 4px rgba(139,92,246,.15);"></span>
+        <span class="notif-content">
+          <strong>{{ category.name }}</strong>
+          <small>{{ category.total }} reports</small>
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-state"><strong>No category data</strong></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Locations</span>
+        <h3 style="margin-top:4px;">📍 Common Areas</h3>
+      </div>
+    </div>
+    <div class="panel-body no-pad">
+      {% for location in top_locations %}
+      <div class="notif-row">
+        <span class="notif-dot" style="background:var(--accent-cyan);box-shadow:0 0 0 4px rgba(6,182,212,.15);"></span>
+        <span class="notif-content">
+          <strong>{{ location }}</strong>
+          <small>{{ location.total }} reports</small>
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-state"><strong>No location data</strong></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 {% endblock %}

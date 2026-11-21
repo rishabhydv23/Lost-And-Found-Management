@@ -1,2 +1,59 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Campus directory</p><h2>Categories &amp; locations</h2></div></div><div class="row g-4"><div class="col-md-5"><div class="card form-card"><h4>Add category</h4><form method="post">{% csrf_token %}<input type="hidden" name="kind" value="category"><input class="form-control mb-3" name="name" required placeholder="Category name"><button class="btn btn-primary">Add category</button></form><hr>{% for category in categories %}<div class="report-row px-0"><span class="report-icon">C</span><span class="report-name"><strong>{{ category.name }}</strong></span></div>{% endfor %}</div></div><div class="col-md-7"><div class="card form-card"><h4>Add campus location</h4><form method="post" class="row g-2">{% csrf_token %}<input type="hidden" name="kind" value="location"><div class="col-md-6"><input class="form-control" name="building" required placeholder="Building"></div><div class="col-md-6"><input class="form-control" name="block" placeholder="Block"></div><div class="col-md-6"><input class="form-control" name="floor" placeholder="Floor"></div><div class="col-md-6"><input class="form-control" name="specific_location" required placeholder="Specific location"></div><div class="col-12"><button class="btn btn-primary mt-1">Add location</button></div></form><hr>{% for location in locations %}<div class="report-row px-0"><span class="report-icon">L</span><span class="report-name"><strong>{{ location }}</strong></span></div>{% endfor %}</div></div></div>{% endblock %}
+{% block title %}Categories & Locations — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Campus Directory</p>
+    <h1>🏷️ Categories & Locations</h1>
+  </div>
+</div>
+
+<div class="two-col">
+  <!-- Categories -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3>📂 Categories</h3>
+    </div>
+    <div class="panel-body">
+      <form method="post" style="display:flex;gap:10px;margin-bottom:18px;">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="category">
+        <input class="form-control" name="name" required placeholder="Category name" style="flex:1;">
+        <button class="btn btn-primary btn-sm">Add</button>
+      </form>
+      {% for category in categories %}
+      <div class="list-row" style="grid-template-columns:44px 1fr;padding:10px 0;border-bottom-color:var(--line-light);">
+        <span class="list-row-icon default">C</span>
+        <span class="list-row-info"><strong>{{ category.name }}</strong></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Locations -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3>📍 Campus Locations</h3>
+    </div>
+    <div class="panel-body">
+      <form method="post" style="margin-bottom:18px;">
+        {% csrf_token %}
+        <input type="hidden" name="kind" value="location">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <input class="form-control" name="building" required placeholder="Building">
+          <input class="form-control" name="block" placeholder="Block">
+          <input class="form-control" name="floor" placeholder="Floor">
+          <input class="form-control" name="specific_location" required placeholder="Specific location">
+        </div>
+        <button class="btn btn-primary btn-sm">Add Location</button>
+      </form>
+      {% for location in locations %}
+      <div class="list-row" style="grid-template-columns:44px 1fr;padding:10px 0;border-bottom-color:var(--line-light);">
+        <span class="list-row-icon" style="background:rgba(6,182,212,.1);color:var(--accent-cyan);">L</span>
+        <span class="list-row-info"><strong>{{ location }}</strong></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

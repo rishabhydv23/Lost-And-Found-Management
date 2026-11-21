@@ -1,2 +1,30 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Account</p><h2>My profile</h2></div></div><div class="col-lg-7 mx-auto"><div class="card form-card"><form method="post" enctype="multipart/form-data">{% csrf_token %}<div class="row g-3"><div class="col-md-6">{{ form.role.label_tag }}{{ form.role }}</div><div class="col-md-6">{{ form.phone.label_tag }}{{ form.phone }}</div><div class="col-12">{{ form.profile_picture.label_tag }}{{ form.profile_picture }}</div></div><button class="btn btn-primary mt-4">Save profile</button></form></div></div>{% endblock %}
+{% block title %}Profile — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Account</p>
+    <h1>My Profile</h1>
+  </div>
+</div>
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+      <div>
+        <label>{{ form.role.label }}</label>
+        {{ form.role }}
+      </div>
+      <div>
+        <label>{{ form.phone.label }}</label>
+        {{ form.phone }}
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <label>{{ form.profile_picture.label }}</label>
+      {{ form.profile_picture }}
+    </div>
+    <button class="btn btn-primary">Save Profile</button>
+  </form>
+</div>
+{% endblock %}

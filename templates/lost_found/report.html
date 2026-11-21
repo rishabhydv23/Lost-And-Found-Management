@@ -1,13 +1,85 @@
 {% extends 'base.html' %}
 {% block body_class %}report-page{% endblock %}
+{% block title %}Report Item — LPU Lost & Found{% endblock %}
 {% block content %}
-<div class="report-intro"><ul><li>Describe what the item looks like, but hold back one detail only the owner would know.</li><li>Add a photo. Reports with images are matched much faster.</li></ul></div>
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">{% if editing %}Edit Report{% else %}New Report{% endif %}</p>
+    <h1>{% if report_type == 'FOUND' %}📦 Report a Found Item{% else %}🔍 Report a Lost Item{% endif %}</h1>
+  </div>
+</div>
+
+<div class="report-intro">
+  <ul>
+    <li>Describe what the item looks like, but hold back one detail only the owner would know.</li>
+    <li>Add a photo. Reports with images are matched much faster.</li>
+  </ul>
+</div>
+
 <form class="report-form" method="post" enctype="multipart/form-data">
 {% csrf_token %}
-<section class="report-section"><h2>{% if report_type == 'FOUND' %}What you found{% else %}What you lost{% endif %}</h2><div class="report-grid-two"><div><label for="{{ form.item_name.id_for_label }}">Item name</label>{{ form.item_name }}</div><div><label for="{{ form.category.id_for_label }}">Category</label>{{ form.category }}</div></div><div class="report-field-full"><label for="{{ form.description.id_for_label }}">Description</label>{{ form.description }}</div><div class="report-grid-two"><div><label for="{{ form.color.id_for_label }}">Color</label>{{ form.color }}</div><div><label for="{{ form.brand.id_for_label }}">Brand <span>(optional)</span></label>{{ form.brand }}</div></div><div class="report-field-full"><label for="{{ form.identifying_details.id_for_label }}">Identifying details</label>{{ form.identifying_details }}</div></section>
-<section class="report-section"><h2>Where and when</h2><div class="report-field-full"><label for="{{ form.campus_location.id_for_label }}">Campus location</label>{{ form.campus_location }}</div><div class="report-grid-two"><div><label for="{{ form.date_occurrence.id_for_label }}">Date {% if report_type == 'FOUND' %}found{% else %}lost{% endif %}</label>{{ form.date_occurrence }}</div><div><label for="{{ form.approximate_time.id_for_label }}">Approximate time</label>{{ form.approximate_time }}</div></div></section>
-<section class="report-section"><h2>Where the item is now</h2><p class="section-help">So the owner knows where to collect it.</p><div class="report-field-full"><label for="{{ form.custody.id_for_label }}">Custody</label>{{ form.custody }}</div></section>
-<section class="report-section"><h2>Photos</h2><p class="section-help">Up to 5 MB per image. Clear photos help owners recognise their item.</p><label class="photo-drop" for="report-images"><input id="report-images" type="file" name="images" multiple accept="image/jpeg,image/png,image/webp"><strong>Drop images here or click to browse</strong><span>JPG, PNG or WebP</span></label></section>
-<div class="report-actions"><button class="btn submit-report" type="submit">Submit report</button><button class="btn clear-report" type="reset">Clear form</button></div>
+<section class="report-section">
+  <h2>{% if report_type == 'FOUND' %}What you found{% else %}What you lost{% endif %}</h2>
+  <div class="report-grid-two">
+    <div>
+      <label for="{{ form.item_name.id_for_label }}">Item name</label>{{ form.item_name }}
+    </div>
+    <div>
+      <label for="{{ form.category.id_for_label }}">Category</label>{{ form.category }}
+    </div>
+  </div>
+  <div class="report-field-full">
+    <label for="{{ form.description.id_for_label }}">Description</label>{{ form.description }}
+  </div>
+  <div class="report-grid-two">
+    <div>
+      <label for="{{ form.color.id_for_label }}">Color</label>{{ form.color }}
+    </div>
+    <div>
+      <label for="{{ form.brand.id_for_label }}">Brand <span>(optional)</span></label>{{ form.brand }}
+    </div>
+  </div>
+  <div class="report-field-full">
+    <label for="{{ form.identifying_details.id_for_label }}">Identifying details</label>{{ form.identifying_details }}
+  </div>
+</section>
+
+<section class="report-section">
+  <h2>📍 Where and when</h2>
+  <div class="report-field-full">
+    <label for="{{ form.campus_location.id_for_label }}">Campus location</label>{{ form.campus_location }}
+  </div>
+  <div class="report-grid-two">
+    <div>
+      <label for="{{ form.date_occurrence.id_for_label }}">Date {% if report_type == 'FOUND' %}found{% else %}lost{% endif %}</label>{{ form.date_occurrence }}
+    </div>
+    <div>
+      <label for="{{ form.approximate_time.id_for_label }}">Approximate time</label>{{ form.approximate_time }}
+    </div>
+  </div>
+</section>
+
+<section class="report-section">
+  <h2>🏢 Where the item is now</h2>
+  <p class="section-help">So the owner knows where to collect it.</p>
+  <div class="report-field-full">
+    <label for="{{ form.custody.id_for_label }}">Custody</label>{{ form.custody }}
+  </div>
+</section>
+
+<section class="report-section">
+  <h2>📸 Photos</h2>
+  <p class="section-help">Up to 5 MB per image. Clear photos help owners recognise their item.</p>
+  <label class="photo-drop" for="report-images">
+    <input id="report-images" type="file" name="images" multiple accept="image/jpeg,image/png,image/webp">
+    <strong>Drop images here or click to browse</strong>
+    <span>JPG, PNG or WebP</span>
+  </label>
+</section>
+
+<div class="report-actions">
+  <button class="btn submit-report" type="submit">📤 Submit Report</button>
+  <button class="btn clear-report" type="reset">🗑️ Clear Form</button>
+</div>
 </form>
 {% endblock %}

@@ -7,44 +7,119 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
-<nav class="navbar navbar-expand-lg app-navbar sticky-top">
-  <div class="container-fluid px-lg-5">
-    <a class="navbar-brand app-brand" href="{% url 'home' %}">
-      <span class="brand-mark">LF</span>
-      <span>LPU <strong>Lost &amp; Found</strong></span>
+
+<!-- Mobile sidebar toggle -->
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.sidebar-overlay').classList.toggle('show')">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+
+<div class="app-layout">
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <a class="sidebar-brand" href="{% url 'home' %}">
+      <span class="sidebar-brand-icon">LF</span>
+      <span class="sidebar-brand-text">LPU Lost & Found<small>Campus System</small></span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav mx-auto app-nav">
-        <li class="nav-item"><a class="nav-link {% if request.GET.type == 'LOST' %}active-link{% endif %}" href="{% url 'browse' %}?type=LOST">Lost items</a></li>
-        <li class="nav-item"><a class="nav-link {% if request.GET.type == 'FOUND' %}active-link{% endif %}" href="{% url 'browse' %}?type=FOUND">Found items</a></li>
-        {% if user.is_authenticated %}
-        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active-link{% endif %}" href="{% url 'dashboard' %}">Dashboard</a></li>
-        {% if user.is_superuser or user.profile.role == 'ADMIN' %}<li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Admin</a></li>{% endif %}
-        {% endif %}
-      </ul>
-      <div class="d-flex gap-2">
-        {% if user.is_authenticated %}
-        <a class="avatar-button" href="{% url 'profile' %}" title="Profile">{{ user.first_name|first|default:user.username|first|upper }}</a>
-        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn app-button-secondary btn-sm">Logout</button></form>
-        {% else %}
-        <a class="btn btn-sm btn-outline-primary" href="{% url 'login' %}">Login</a>
-        <a class="btn btn-sm btn-primary" href="{% url 'register' %}">Register</a>
-        {% endif %}
-      </div>
+
+    <nav class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+        <span class="link-icon">🏠</span> Home
+      </a>
+      <a class="sidebar-link {% if request.GET.type == 'LOST' %}active{% endif %}" href="{% url 'browse' %}?type=LOST">
+        <span class="link-icon">🔍</span> Lost Items
+      </a>
+      <a class="sidebar-link {% if request.GET.type == 'FOUND' %}active{% endif %}" href="{% url 'browse' %}?type=FOUND">
+        <span class="link-icon">📦</span> Found Items
+      </a>
+    </nav>
+
+    {% if user.is_authenticated %}
+    <nav class="sidebar-section">
+      <div class="sidebar-label">My Account</div>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+        <span class="link-icon">📊</span> Dashboard
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'my_reports' %}active{% endif %}" href="{% url 'my_reports' %}">
+        <span class="link-icon">📝</span> My Reports
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'my_claims' %}active{% endif %}" href="{% url 'my_claims' %}">
+        <span class="link-icon">✋</span> My Claims
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'potential_matches' %}active{% endif %}" href="{% url 'potential_matches' %}">
+        <span class="link-icon">🔗</span> Matches
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}">
+        <span class="link-icon">🔔</span> Notifications
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
+        <span class="link-icon">👤</span> Profile
+      </a>
+    </nav>
+
+    {% if user.is_superuser or user.profile.role == 'ADMIN' %}
+    <nav class="sidebar-section">
+      <div class="sidebar-label">Administration</div>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+        <span class="link-icon">⚡</span> Admin Panel
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_reports' %}active{% endif %}" href="{% url 'manage_reports' %}">
+        <span class="link-icon">📋</span> Manage Reports
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_claims' %}active{% endif %}" href="{% url 'manage_claims' %}">
+        <span class="link-icon">✅</span> Manage Claims
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_users' %}active{% endif %}" href="{% url 'manage_users' %}">
+        <span class="link-icon">👥</span> Manage Users
+      </a>
+      <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_taxonomy' %}active{% endif %}" href="{% url 'manage_taxonomy' %}">
+        <span class="link-icon">🏷️</span> Categories & Locations
+      </a>
+    </nav>
+    {% endif %}
+
+    <!-- Sidebar footer with user info -->
+    <div class="sidebar-footer">
+      <a class="sidebar-user" href="{% url 'profile' %}">
+        <span class="sidebar-avatar">{{ user.first_name|first|default:user.username|first|upper }}</span>
+        <span class="sidebar-user-info">
+          <span class="sidebar-user-name">{{ user.get_full_name|default:user.username }}</span>
+          <span class="sidebar-user-role">{{ user.profile.get_role_display|default:"Member" }}</span>
+        </span>
+      </a>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="sidebar-logout" type="submit">🚪 Sign Out</button>
+      </form>
     </div>
-  </div>
-</nav>
-<main class="container-fluid px-lg-5 py-4 app-shell">
-  {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}{% endif %}
-  {% block content %}{% endblock %}
-</main>
-<footer class="border-top py-4 text-center text-muted">Lovely Professional University · Lost &amp; Found Management</footer>
+    {% else %}
+    <div class="sidebar-footer">
+      <a class="sidebar-link" href="{% url 'login' %}">
+        <span class="link-icon">🔑</span> Sign In
+      </a>
+      <a class="sidebar-link" href="{% url 'register' %}" style="background:rgba(99,102,241,.15);color:#818cf8;font-weight:600;">
+        <span class="link-icon">✨</span> Register
+      </a>
+    </div>
+    {% endif %}
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-content">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+    <footer class="app-footer">Lovely Professional University · Lost & Found Management System</footer>
+  </main>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

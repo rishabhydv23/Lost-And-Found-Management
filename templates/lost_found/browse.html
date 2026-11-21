@@ -1,20 +1,83 @@
 {% extends 'base.html' %}
+{% block title %}{{ report_type|title }} Items — LPU Lost & Found{% endblock %}
 {% block content %}
-<div class="listing-heading"><div><h2>{{ report_type|title }} items</h2><p>{% if report_type == 'LOST' %}Things people on campus are looking for. Spot yours or something you found.{% else %}Items handed in or picked up around campus. Find yours and start a claim.{% endif %}</p></div></div>
-{% if user.is_authenticated %}<a class="listing-report-link" href="{% if report_type == 'LOST' %}{% url 'report_lost' %}{% else %}{% url 'report_found' %}{% endif %}">+ Report {{ report_type|lower }} item</a>{% endif %}
-<form class="listing-filter mb-4"><input type="hidden" name="type" value="{{ report_type }}"><div class="filter-full"><input class="form-control" name="q" placeholder="Search by item name" value="{{ request.GET.q }}"></div><div class="filter-row"><select class="form-select" name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select><select class="form-select" name="location"><option value="">All locations</option>{% for location in locations %}<option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:'s' %}selected{% endif %}>{{ location }}</option>{% endfor %}</select></div><div class="filter-row filter-row-short"><input class="form-control" name="color" placeholder="Color" value="{{ request.GET.color }}"><button class="filter-submit" type="submit">Filter</button></div></form>
+<div class="listing-heading">
+  <h2>{% if report_type == 'LOST' %}🔍{% else %}📦{% endif %} {{ report_type|title }} Items</h2>
+  <p>{% if report_type == 'LOST' %}Things people on campus are looking for. Spot yours or something you found.{% else %}Items handed in or picked up around campus. Find yours and start a claim.{% endif %}</p>
+</div>
+
+{% if user.is_authenticated %}
+<a class="listing-report-link" href="{% if report_type == 'LOST' %}{% url 'report_lost' %}{% else %}{% url 'report_found' %}{% endif %}">+ Report {{ report_type|lower }} item</a>
+{% endif %}
+
+<form class="listing-filter mb-4">
+  <input type="hidden" name="type" value="{{ report_type }}">
+  <div class="filter-full">
+    <input class="form-control" name="q" placeholder="Search by item name..." value="{{ request.GET.q }}">
+  </div>
+  <div class="filter-row">
+    <select class="form-select" name="category">
+      <option value="">All categories</option>
+      {% for category in categories %}<option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}
+    </select>
+    <select class="form-select" name="location">
+      <option value="">All locations</option>
+      {% for location in locations %}<option value="{{ location.id }}" {% if request.GET.location == location.id|stringformat:'s' %}selected{% endif %}>{{ location }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filter-row filter-row-short">
+    <input class="form-control" name="color" placeholder="Color" value="{{ request.GET.color }}">
+    <button class="filter-submit" type="submit">🔎 Filter</button>
+  </div>
+</form>
+
 <p class="listing-count">{{ items.paginator.count }} item{{ items.paginator.count|pluralize }}</p>
-<div class="listing-grid">{% for item in items %}<article class="listing-card">{% if item.images.first %}<img class="listing-placeholder" src="{{ item.images.first.image.url }}" alt="{{ item.item_name }}">{% else %}<div class="listing-placeholder listing-placeholder-empty">
-<span class="category-illustration">
-{% if item.category.name == 'Bags' %}🎒
-{% elif item.category.name == 'Electronics' %}🧮
-{% elif item.category.name == 'Keys' %}🔑
-{% elif item.category.name == 'Documents' %}🪪
-{% elif item.category.name == 'Clothing' %}👕
-{% elif item.category.name == 'Books' %}📘
-{% elif item.category.name == 'Jewellery' %}💍
-{% elif item.category.name == 'Sports Equipment' %}🏸
-{% else %}📦{% endif %}
-</span></div>{% endif %}<div class="listing-card-body"><span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">{{ item.get_report_type_display }}</span><h3>{{ item.item_name }}</h3><p>{{ item.category.name }} · {{ item.color|default:'Not specified' }}</p><p>{{ item.campus_location.specific_location|default:item.campus_location }}</p><p>{% if item.report_type == 'LOST' %}Lost{% else %}Found{% endif %} on {{ item.date_occurrence|date:'d M' }}</p>{% if item.report_type == 'FOUND' %}{% if user.is_authenticated %}<a class="listing-action" href="{% url 'create_claim' item.pk %}">This is mine</a>{% else %}<a class="listing-action" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">This is mine</a>{% endif %}{% else %}<a class="listing-action" href="{% url 'item_detail' item.pk %}">I found this</a>{% endif %}</div></article>{% empty %}<div class="empty-state card listing-empty">No approved items found.</div>{% endfor %}</div>
-{% if items.paginator.num_pages > 1 %}<nav class="mt-4"><ul class="pagination">{% if items.has_previous %}<li class="page-item"><a class="page-link" href="?type={{ report_type }}&page={{ items.previous_page_number }}">Previous</a></li>{% endif %}<li class="page-item active"><span class="page-link">{{ items.number }}</span></li>{% if items.has_next %}<li class="page-item"><a class="page-link" href="?type={{ report_type }}&page={{ items.next_page_number }}">Next</a></li>{% endif %}</ul></nav>{% endif %}
+
+<div class="listing-grid">
+  {% for item in items %}
+  <article class="listing-card">
+    {% if item.images.first %}
+      <img class="listing-placeholder" src="{{ item.images.first.image.url }}" alt="{{ item.item_name }}">
+    {% else %}
+      <div class="listing-placeholder listing-placeholder-empty">
+        <span class="category-illustration">
+          {% if item.category.name == 'Bags' %}🎒{% elif item.category.name == 'Electronics' %}🧮{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Documents' %}🪪{% elif item.category.name == 'Clothing' %}👕{% elif item.category.name == 'Books' %}📘{% elif item.category.name == 'Jewellery' %}💍{% elif item.category.name == 'Sports Equipment' %}🏸{% else %}📦{% endif %}
+        </span>
+      </div>
+    {% endif %}
+    <div class="listing-card-body">
+      <span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">{{ item.get_report_type_display }}</span>
+      <h3>{{ item.item_name }}</h3>
+      <p>{{ item.category.name }} · {{ item.color|default:'Not specified' }}</p>
+      <p>{{ item.campus_location.specific_location|default:item.campus_location }}</p>
+      <p>{% if item.report_type == 'LOST' %}Lost{% else %}Found{% endif %} on {{ item.date_occurrence|date:'d M' }}</p>
+      {% if item.report_type == 'FOUND' %}
+        {% if user.is_authenticated %}
+          <a class="listing-action" href="{% url 'create_claim' item.pk %}">✋ This is mine</a>
+        {% else %}
+          <a class="listing-action" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ This is mine</a>
+        {% endif %}
+      {% else %}
+        <a class="listing-action" href="{% url 'item_detail' item.pk %}">👀 I found this</a>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <div class="empty-state panel listing-empty">
+    <div class="empty-icon">🔎</div>
+    <strong>No approved items found</strong>
+    <span>Check back later or adjust your filters</span>
+  </div>
+  {% endfor %}
+</div>
+
+{% if items.paginator.num_pages > 1 %}
+<nav>
+  <ul class="pagination">
+    {% if items.has_previous %}<li class="page-item"><a class="page-link" href="?type={{ report_type }}&page={{ items.previous_page_number }}">← Previous</a></li>{% endif %}
+    <li class="page-item active"><span class="page-link">{{ items.number }}</span></li>
+    {% if items.has_next %}<li class="page-item"><a class="page-link" href="?type={{ report_type }}&page={{ items.next_page_number }}">Next →</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
 {% endblock %}

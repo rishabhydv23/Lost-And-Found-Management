@@ -1,22 +1,38 @@
 {% extends 'base.html' %}
+{% block title %}Home — LPU Lost & Found{% endblock %}
 {% block content %}
-<section class="hero rounded-4 p-5 text-white">
-  <div class="col-lg-8">
-    <span class="badge bg-light text-primary mb-3">LPU Campus Community</span>
-    <h1 class="display-5 fw-bold">Find what is lost. Return what is found.</h1>
-    <p class="lead">A secure, campus-wide place for reporting belongings and recovering them responsibly.</p>
+<!-- Hero Section -->
+<div class="hero-section">
+  <span class="hero-badge">🎓 LPU Campus Community</span>
+  <h1>Find what is lost. Return what is found.</h1>
+  <p>A secure, campus-wide platform for reporting belongings and recovering them responsibly through smart matching.</p>
+  <div class="hero-actions">
     {% if user.is_authenticated %}
-      <a class="btn btn-light btn-lg me-2" href="{% url 'report_lost' %}">Report lost item</a>
-      <a class="btn btn-outline-light btn-lg" href="{% url 'report_found' %}">Report found item</a>
+      <a class="btn btn-light" href="{% url 'report_lost' %}">🔍 Report Lost Item</a>
+      <a class="btn btn-ghost" href="{% url 'report_found' %}">📦 Report Found Item</a>
     {% else %}
-      <a class="btn btn-light btn-lg me-2" href="{% url 'register' %}">Get started</a>
-      <a class="btn btn-outline-light btn-lg" href="{% url 'browse' %}">Browse items</a>
+      <a class="btn btn-light" href="{% url 'register' %}">✨ Get Started</a>
+      <a class="btn btn-ghost" href="{% url 'browse' %}?type=LOST">Browse Items</a>
     {% endif %}
   </div>
-</section>
-<div class="row g-4 mt-2">
-  <div class="col-md-4"><div class="card h-100 p-3"><h5>Report securely</h5><p class="text-muted">Add identifying details and private ownership evidence.</p></div></div>
-  <div class="col-md-4"><div class="card h-100 p-3"><h5>Smart matching</h5><p class="text-muted">Potential matches are scored across location, category, date and description.</p></div></div>
-  <div class="col-md-4"><div class="card h-100 p-3"><h5>Verified recovery</h5><p class="text-muted">Administrators review claims before an item is marked recovered.</p></div></div>
+</div>
+
+<!-- Feature Cards -->
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">🔒</div>
+    <h5>Report Securely</h5>
+    <p>Add identifying details and private ownership evidence. Your sensitive information stays protected.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-card-icon">🧠</div>
+    <h5>Smart Matching</h5>
+    <p>Potential matches are scored across location, category, date, and description using weighted algorithms.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-card-icon">✅</div>
+    <h5>Verified Recovery</h5>
+    <p>Administrators review claims before an item is marked recovered. Safe and transparent process.</p>
+  </div>
 </div>
 {% endblock %}

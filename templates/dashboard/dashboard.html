@@ -1,47 +1,109 @@
 {% extends 'base.html' %}
+{% block title %}Dashboard — LPU Lost & Found{% endblock %}
 {% block content %}
-<div class="dashboard-heading d-flex align-items-end justify-content-between mb-4">
-  <div><h2 class="mb-1">Good to see you, {{ user.first_name|default:user.username }}</h2><p class="text-muted mb-0">Here's where your reports stand today.</p></div>
-  <div class="d-flex gap-2">
-    <a class="btn dashboard-found-btn" href="{% url 'report_found' %}"><span class="me-1">+</span> Found item</a>
-    <a class="btn dashboard-lost-btn" href="{% url 'report_lost' %}"><span class="me-1">+</span> Lost item</a>
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>Good to see you, {{ user.first_name|default:user.username }} 👋</h1>
+    <p>Here's where your reports stand today.</p>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn btn-secondary" href="{% url 'report_found' %}">+ Found Item</a>
+    <a class="btn btn-primary" href="{% url 'report_lost' %}">+ Lost Item</a>
   </div>
 </div>
 
-<div class="row g-3 mb-4">
-  <div class="col-6 col-lg-2"><div class="metric-card"><span>Lost reports</span><strong>{{ lost_count }}</strong><small class="text-success">Active tracking</small></div></div>
-  <div class="col-6 col-lg-2"><div class="metric-card"><span>Found reports</span><strong>{{ found_count }}</strong><small>Registered</small></div></div>
-  <div class="col-6 col-lg-2"><div class="metric-card"><span>Active reports</span><strong>{{ active_count }}</strong><small>Open</small></div></div>
-  <div class="col-6 col-lg-2"><div class="metric-card accent-green"><span>Potential matches</span><strong>{{ match_count }}</strong><small>Needs review</small></div></div>
-  <div class="col-6 col-lg-2"><div class="metric-card accent-purple"><span>Pending claims</span><strong>{{ claim_count }}</strong><small>In progress</small></div></div>
-  <div class="col-6 col-lg-2"><div class="metric-card"><span>Recovered</span><strong>{{ recovered_count }}</strong><small class="text-success">Completed</small></div></div>
+<!-- Metric Cards -->
+<div class="metrics-grid">
+  <div class="metric-card gradient grad-blue">
+    <div class="metric-icon">🔍</div>
+    <span class="metric-label">Lost Reports</span>
+    <div class="metric-value">{{ lost_count }}</div>
+    <span class="metric-sub">Active tracking</span>
+  </div>
+  <div class="metric-card gradient grad-green">
+    <div class="metric-icon">📦</div>
+    <span class="metric-label">Found Reports</span>
+    <div class="metric-value">{{ found_count }}</div>
+    <span class="metric-sub">Registered</span>
+  </div>
+  <div class="metric-card gradient grad-orange">
+    <div class="metric-icon">📊</div>
+    <span class="metric-label">Active Reports</span>
+    <div class="metric-value">{{ active_count }}</div>
+    <span class="metric-sub">Currently open</span>
+  </div>
+  <div class="metric-card gradient grad-cyan">
+    <div class="metric-icon">🔗</div>
+    <span class="metric-label">Potential Matches</span>
+    <div class="metric-value">{{ match_count }}</div>
+    <span class="metric-sub">Needs review</span>
+  </div>
+  <div class="metric-card gradient grad-purple">
+    <div class="metric-icon">✋</div>
+    <span class="metric-label">Pending Claims</span>
+    <div class="metric-value">{{ claim_count }}</div>
+    <span class="metric-sub">In progress</span>
+  </div>
+  <div class="metric-card gradient grad-pink">
+    <div class="metric-icon">✅</div>
+    <span class="metric-label">Recovered</span>
+    <div class="metric-value">{{ recovered_count }}</div>
+    <span class="metric-sub">Completed</span>
+  </div>
 </div>
 
-<div class="row g-4">
-  <div class="col-12">
-    <div class="card dashboard-panel h-100">
-      <div class="panel-heading"><div><h5 class="mb-0">Recent reports</h5></div><a class="text-decoration-none" href="{% url 'my_reports' %}">View all</a></div>
-      <div class="report-table">
-        {% for item in recent_reports %}
-        <a class="report-row" href="{% url 'item_detail' item.pk %}">
-          <span class="report-icon">{% if item.report_type == 'LOST' %}L{% else %}F{% endif %}</span>
-          <span class="report-name"><strong>{{ item.item_name }}</strong><small>{{ item.category.name }} · {{ item.campus_location }}</small></span>
-          <span class="status-pill status-{{ item.status|lower }}">{{ item.status|title }}</span>
-          <span class="row-arrow">›</span>
-        </a>
-        {% empty %}<div class="empty-state recent-empty"><strong>No reports yet</strong><span>Lost something or found something? Your reports will show up here.</span><a href="{% url 'my_reports' %}">Report an item</a></div>{% endfor %}
+<!-- Recent Reports Panel -->
+<div class="grid-2 mb-4">
+  <div class="panel" style="grid-column: 1 / -1;">
+    <div class="panel-header">
+      <h3>📋 Recent Reports</h3>
+      <a class="panel-action" href="{% url 'my_reports' %}">View all →</a>
+    </div>
+    <div class="panel-body no-pad">
+      {% for item in recent_reports %}
+      <a class="list-row" href="{% url 'item_detail' item.pk %}">
+        <span class="list-row-icon {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">{% if item.report_type == 'LOST' %}L{% else %}F{% endif %}</span>
+        <span class="list-row-info">
+          <strong>{{ item.item_name }}</strong>
+          <small>{{ item.category.name }} · {{ item.campus_location }}</small>
+        </span>
+        <span class="pill pill-{{ item.status|lower }}">{{ item.status|title }}</span>
+        <span class="list-row-arrow">›</span>
+      </a>
+      {% empty %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <strong>No reports yet</strong>
+        <span>Lost something or found something? Your reports will show up here.</span>
+        <a href="{% url 'my_reports' %}">Report an item →</a>
       </div>
+      {% endfor %}
     </div>
   </div>
-  <div class="col-12">
-    <div class="card dashboard-panel h-100">
-      <div class="panel-heading"><div><h5 class="mb-0">Notifications</h5></div><a class="text-decoration-none" href="{% url 'notifications' %}">Open</a></div>
-      <div class="notification-list">
-        {% for notification in notifications %}
-        <div class="notification-row"><span class="notification-dot"></span><div><strong>{{ notification.message }}</strong><small>{{ notification.created_at|timesince }} ago</small></div></div>
-        {% empty %}<div class="empty-state">You're all caught up.</div>{% endfor %}
-      </div>
+</div>
+
+<!-- Notifications Panel -->
+<div class="panel">
+  <div class="panel-header">
+    <h3>🔔 Notifications</h3>
+    <a class="panel-action" href="{% url 'notifications' %}">Open →</a>
+  </div>
+  <div class="panel-body no-pad">
+    {% for notification in notifications %}
+    <div class="notif-row">
+      <span class="notif-dot"></span>
+      <span class="notif-content">
+        <strong>{{ notification.message }}</strong>
+        <small>{{ notification.created_at|timesince }} ago</small>
+      </span>
     </div>
+    {% empty %}
+    <div class="empty-state">
+      <div class="empty-icon">✨</div>
+      <strong>You're all caught up</strong>
+      <span>No new notifications</span>
+    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

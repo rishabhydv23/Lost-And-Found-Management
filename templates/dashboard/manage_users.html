@@ -1,2 +1,47 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Directory</p><h2>Manage users</h2></div></div><div class="table-card"><table class="table mb-0"><thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Role / status</th></tr></thead><tbody>{% for managed_user in users %}<tr><td><strong>{{ managed_user.username }}</strong></td><td>{{ managed_user.get_full_name|default:'-' }}</td><td>{{ managed_user.email }}</td><td><form method="post" class="d-flex gap-2">{% csrf_token %}<input type="hidden" name="user_id" value="{{ managed_user.pk }}"><select class="form-select form-select-sm" name="role"><option value="STUDENT" {% if managed_user.profile.role == 'STUDENT' %}selected{% endif %}>Student</option><option value="FACULTY" {% if managed_user.profile.role == 'FACULTY' %}selected{% endif %}>Faculty / Staff</option><option value="ADMIN" {% if managed_user.profile.role == 'ADMIN' %}selected{% endif %}>Administrator</option></select><label class="form-check mt-2"><input class="form-check-input" type="checkbox" name="is_active" {% if managed_user.is_active %}checked{% endif %}> Active</label><button class="btn btn-sm btn-primary">Save</button></form></td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% block title %}Manage Users — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Directory</p>
+    <h1>👥 Manage Users</h1>
+  </div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role / Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for managed_user in users %}
+      <tr>
+        <td><strong>{{ managed_user.username }}</strong></td>
+        <td>{{ managed_user.get_full_name|default:'-' }}</td>
+        <td>{{ managed_user.email }}</td>
+        <td>
+          <form method="post" style="display:flex;align-items:center;gap:8px;">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ managed_user.pk }}">
+            <select class="form-select" name="role" style="min-height:36px;min-width:130px;font-size:13px;">
+              <option value="STUDENT" {% if managed_user.profile.role == 'STUDENT' %}selected{% endif %}>Student</option>
+              <option value="FACULTY" {% if managed_user.profile.role == 'FACULTY' %}selected{% endif %}>Faculty / Staff</option>
+              <option value="ADMIN" {% if managed_user.profile.role == 'ADMIN' %}selected{% endif %}>Administrator</option>
+            </select>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap;margin:0;">
+              <input type="checkbox" name="is_active" {% if managed_user.is_active %}checked{% endif %} style="accent-color:var(--primary);"> Active
+            </label>
+            <button class="btn btn-sm btn-primary">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

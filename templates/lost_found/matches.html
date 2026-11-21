@@ -1,2 +1,30 @@
 {% extends 'base.html' %}
-{% block content %}<div class="page-heading"><div><p class="eyebrow mb-1">Smart search</p><h2>Potential matches</h2></div></div><div class="row g-3">{% for match in matches %}<div class="col-md-6"><div class="card management-card"><div class="d-flex justify-content-between"><h5>{{ match.found_report.item_name }}</h5><span class="status-pill status-approved">{{ match.score }}% match</span></div><p class="mb-1">Matches your report: <strong>{{ match.lost_report.item_name }}</strong></p><p class="text-muted">{{ match.found_report.category }} · {{ match.found_report.campus_location }}</p><a class="btn btn-sm btn-outline-primary" href="{% url 'item_detail' match.found_report.pk %}">Review item</a></div></div>{% empty %}<div class="col-12"><div class="card empty-state">No potential matches yet.</div></div>{% endfor %}</div>{% endblock %}
+{% block title %}Potential Matches — LPU Lost & Found{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-info">
+    <p class="eyebrow">Smart Search</p>
+    <h1>🔗 Potential Matches</h1>
+  </div>
+</div>
+
+<div class="grid-2">
+  {% for match in matches %}
+  <div class="mgmt-card">
+    <div class="d-flex justify-content-between align-items-center" style="margin-bottom:8px;">
+      <h5 style="margin:0;">{{ match.found_report.item_name }}</h5>
+      <span class="pill pill-match">{{ match.score }}% match</span>
+    </div>
+    <p style="font-size:14px;margin:0 0 4px;">Matches your report: <strong>{{ match.lost_report.item_name }}</strong></p>
+    <p style="color:var(--ink-secondary);font-size:13px;margin:0 0 12px;">{{ match.found_report.category }} · {{ match.found_report.campus_location }}</p>
+    <a class="btn btn-sm btn-primary" href="{% url 'item_detail' match.found_report.pk %}">👀 Review Item</a>
+  </div>
+  {% empty %}
+  <div class="panel empty-state" style="grid-column:1/-1;">
+    <div class="empty-icon">🔗</div>
+    <strong>No potential matches yet</strong>
+    <span>When we find items that could be yours, they'll appear here</span>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
