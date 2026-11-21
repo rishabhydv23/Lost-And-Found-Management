@@ -10,8 +10,8 @@
     <p class="text-muted">Complete oversight, verification, user moderation & campus taxonomy management.</p>
   </div>
   <div class="topbar-actions">
-    <a class="btn btn-secondary" href="{% url 'report_found' %}">+ Report Found</a>
-    <a class="btn btn-primary" href="{% url 'report_lost' %}">+ Report Lost</a>
+    <a class="btn btn-secondary" href="{% url 'report_found' %}">📦 Report Found Item</a>
+    <a class="btn btn-primary" href="{% url 'report_lost' %}">🔍 Report Lost Item</a>
     <a class="btn btn-outline-primary" href="/admin/" target="_blank">Django Admin ↗</a>
   </div>
 </div>
@@ -651,10 +651,10 @@
           <input type="hidden" name="action_type" value="taxonomy">
           <input type="hidden" name="kind" value="location">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-            <input class="form-control" name="building" required placeholder="Building (e.g. Block 32)">
-            <input class="form-control" name="block" placeholder="Block / Wing">
+            <input class="form-control" name="building" required placeholder="Building (e.g. Block 32 or BH-13)">
+            <input class="form-control" name="block" placeholder="Block / Wing (optional)">
             <input class="form-control" name="floor" placeholder="Floor (e.g. 2nd Floor)">
-            <input class="form-control" name="specific_location" required placeholder="Specific area (e.g. Lab 204)">
+            <input class="form-control" name="specific_location" placeholder="Specific area (optional e.g. Mess / Lab 204)">
           </div>
           <button class="btn btn-primary w-100" type="submit">+ Add Campus Location</button>
         </form>

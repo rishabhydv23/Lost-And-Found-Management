@@ -45,7 +45,7 @@ def admin_dashboard(request):
         if action_type == 'update_report' or 'report_id' in request.POST:
             item = get_object_or_404(ItemReport, pk=request.POST.get('report_id'))
             action = request.POST.get('action')
-            if action in ('APPROVED', 'REJECTED', 'RECOVERED', 'CLOSED'):
+            if action in ('APPROVED', 'REJECTED', 'RECOVERED', 'CLOSED', 'PENDING'):
                 item.status = action
                 item.reviewed_by = request.user
                 item.review_remarks = request.POST.get('remarks', '')
@@ -118,14 +118,15 @@ def admin_dashboard(request):
             elif kind == 'location':
                 bld = request.POST.get('building', '').strip()
                 loc = request.POST.get('specific_location', '').strip()
-                if bld and loc:
+                if bld:
                     CampusLocation.objects.get_or_create(
                         building=bld,
                         block=request.POST.get('block', '').strip(),
                         floor=request.POST.get('floor', '').strip(),
                         specific_location=loc,
                     )
-                    messages.success(request, f"Campus location '{bld} - {loc}' created.")
+                    label = f"{bld} - {loc}" if loc else bld
+                    messages.success(request, f"Campus location '{label}' created.")
             return redirect(f"{request.path}?tab=taxonomy")
 
     reports_qs = ItemReport.objects.select_related(

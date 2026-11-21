@@ -708,6 +708,7 @@ label, .form-label {
   background: rgba(255,255,255,.04);
   top: -80px;
   right: -60px;
+  pointer-events: none;
 }
 .hero-section::before {
   content: '';
@@ -718,6 +719,7 @@ label, .form-label {
   background: rgba(255,255,255,.03);
   bottom: -40px;
   left: 20%;
+  pointer-events: none;
 }
 .hero-badge {
   display: inline-flex;
@@ -731,6 +733,8 @@ label, .form-label {
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
 }
 .hero-section h1 {
   font-size: 40px;
@@ -739,6 +743,8 @@ label, .form-label {
   line-height: 1.15;
   margin: 0 0 14px;
   max-width: 580px;
+  position: relative;
+  z-index: 2;
 }
 .hero-section p {
   font-size: 16px;
@@ -746,17 +752,25 @@ label, .form-label {
   max-width: 480px;
   margin: 0 0 28px;
   line-height: 1.6;
+  position: relative;
+  z-index: 2;
 }
 .hero-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 10;
 }
 .hero-actions .btn {
   min-width: 160px;
   padding: 14px 24px;
   font-size: 15px;
   border-radius: var(--radius-md);
+  position: relative;
+  z-index: 15;
+  cursor: pointer;
+  text-decoration: none;
 }
 .hero-actions .btn-light {
   background: #fff;

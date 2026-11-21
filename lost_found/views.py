@@ -60,8 +60,10 @@ def report_item(request, report_type):
             item.save()
             for uploaded in request.FILES.getlist('images'):
                 ItemImage.objects.create(report=item, image=uploaded)
-            messages.success(request, 'Report submitted for administrator approval.')
+            messages.success(request, f'Your {report_type} item report has been submitted for review.')
             return redirect('my_reports')
+        else:
+            messages.error(request, 'Please correct the highlighted errors in the form.')
     else:
         form = ItemReportForm()
     return render(request, 'lost_found/report.html', {

@@ -8,7 +8,7 @@ class ItemReportForm(forms.ModelForm):
 
     class Meta:
         model = ItemReport
-        exclude = ('user', 'status', 'reviewed_by', 'review_remarks')
+        exclude = ('user', 'report_type', 'status', 'reviewed_by', 'review_remarks')
         widgets = {
             'item_name': forms.TextInput(attrs={'placeholder': 'e.g. Black backpack'}),
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': "Size, condition, what's inside, anything visible at a glance"}),

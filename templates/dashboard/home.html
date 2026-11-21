@@ -7,13 +7,8 @@
   <h1>Find what is lost. Return what is found.</h1>
   <p>A secure, campus-wide platform for reporting belongings and recovering them responsibly through smart matching.</p>
   <div class="hero-actions">
-    {% if user.is_authenticated %}
-      <a class="btn btn-light" href="{% url 'report_lost' %}">🔍 Report Lost Item</a>
-      <a class="btn btn-ghost" href="{% url 'report_found' %}">📦 Report Found Item</a>
-    {% else %}
-      <a class="btn btn-light" href="{% url 'register' %}">✨ Get Started</a>
-      <a class="btn btn-ghost" href="{% url 'browse' %}?type=LOST">Browse Items</a>
-    {% endif %}
+    <a class="btn btn-light" href="{% url 'report_lost' %}">🔍 Report Lost Item</a>
+    <a class="btn btn-ghost" href="{% url 'report_found' %}">📦 Report Found Item</a>
   </div>
 </div>
 
