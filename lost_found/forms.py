@@ -14,6 +14,7 @@ class ItemReportForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': "Size, condition, what's inside, anything visible at a glance"}),
             'color': forms.TextInput(attrs={'placeholder': 'e.g. Navy blue'}),
             'brand': forms.TextInput(attrs={'placeholder': 'e.g. Wildcraft'}),
+            'location_details': forms.TextInput(attrs={'placeholder': 'e.g. In front of 25 block, Room 302, Bench near lawn'}),
             'identifying_details': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Name tags, stickers, scratches, serial numbers. Keep one detail private so you can verify the real owner.'}),
             'custody': forms.TextInput(attrs={'placeholder': 'e.g. Security desk, Block 32 or kept with me'}),
             'date_occurrence': forms.DateInput(attrs={'type': 'date'}),

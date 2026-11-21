@@ -34,7 +34,7 @@
       <dt>Brand</dt>
       <dd>{{ item.brand|default:'Not provided' }}</dd>
       <dt>Location</dt>
-      <dd>{{ item.campus_location }}</dd>
+      <dd>{{ item.campus_location }}{% if item.location_details %} · <strong>{{ item.location_details }}</strong>{% endif %}</dd>
       <dt>Date</dt>
       <dd>{{ item.date_occurrence }}</dd>
     </dl>

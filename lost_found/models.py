@@ -19,14 +19,20 @@ class CampusLocation(models.Model):
     building = models.CharField(max_length=100)
     block = models.CharField(max_length=50, blank=True)
     floor = models.CharField(max_length=50, blank=True)
-    specific_location = models.CharField(max_length=150)
+    specific_location = models.CharField(max_length=150, blank=True)
 
     class Meta:
         ordering = ['building', 'specific_location']
 
     def __str__(self):
-        parts = [self.building, self.block, self.specific_location]
-        return ' - '.join(part for part in parts if part)
+        parts = [self.building]
+        if self.block and self.block != self.building:
+            parts.append(self.block)
+        if self.floor:
+            parts.append(self.floor)
+        if self.specific_location and self.specific_location != self.building:
+            parts.append(self.specific_location)
+        return ' - '.join(parts)
 
 
 class ItemReport(models.Model):
@@ -51,6 +57,7 @@ class ItemReport(models.Model):
     date_occurrence = models.DateField()
     approximate_time = models.TimeField(null=True, blank=True)
     campus_location = models.ForeignKey(CampusLocation, on_delete=models.PROTECT, related_name='item_reports')
+    location_details = models.CharField(max_length=150, blank=True, verbose_name="Specific spot / Landmark", help_text="e.g. In front of 25 block, Room 302, Bench near lawn")
     custody = models.CharField(max_length=100, blank=True)
     identifying_details = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)

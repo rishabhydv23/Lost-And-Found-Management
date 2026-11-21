@@ -252,6 +252,7 @@
           </td>
           <td>
             <span>{{ report.campus_location }}</span>
+            {% if report.location_details %}<br><small class="text-primary font-weight-bold">📍 {{ report.location_details }}</small>{% endif %}
           </td>
           <td>
             <small>{{ report.date_occurrence|date:"d M Y" }}</small>
@@ -300,6 +301,10 @@
               <div class="detail-drawer-field">
                 <label>Custody / Current Location</label>
                 <p>{{ report.custody|default:"With reporter" }}</p>
+              </div>
+              <div class="detail-drawer-field">
+                <label>Specific Spot / Custom Location</label>
+                <p style="color:var(--primary);font-weight:600;">{{ report.location_details|default:"Not specified" }}</p>
               </div>
               <div class="detail-drawer-field">
                 <label>Occurrence Time</label>

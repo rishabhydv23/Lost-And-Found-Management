@@ -41,7 +41,7 @@
     {% else %}
       <div class="listing-placeholder listing-placeholder-empty">
         <span class="category-illustration">
-          {% if item.category.name == 'Bags' %}🎒{% elif item.category.name == 'Electronics' %}🧮{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Documents' %}🪪{% elif item.category.name == 'Clothing' %}👕{% elif item.category.name == 'Books' %}📘{% elif item.category.name == 'Jewellery' %}💍{% elif item.category.name == 'Sports Equipment' %}🏸{% else %}📦{% endif %}
+          {% if item.category.name == 'Electronics' %}📱{% elif item.category.name == 'Chargers & Accessories' %}🔌{% elif item.category.name == 'ID Cards & Documents' %}🪪{% elif item.category.name == 'Wallets & Money' %}👛{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Bags & Backpacks' %}🎒{% elif item.category.name == 'Books & Stationery' %}📚{% elif item.category.name == 'Clothing & Accessories' %}👕{% elif item.category.name == 'Water Bottles' %}🍶{% elif item.category.name == 'Earphones & Headphones' %}🎧{% elif item.category.name == 'Watches & Jewellery' %}⌚{% elif item.category.name == 'Sports Equipment' %}🏸{% elif item.category.name == 'Eyewear' %}👓{% elif item.category.name == 'Hostel Items' %}🛏️{% else %}📦{% endif %}
         </span>
       </div>
     {% endif %}
@@ -49,7 +49,7 @@
       <span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">{{ item.get_report_type_display }}</span>
       <h3>{{ item.item_name }}</h3>
       <p>{{ item.category.name }} · {{ item.color|default:'Not specified' }}</p>
-      <p>{{ item.campus_location.specific_location|default:item.campus_location }}</p>
+      <p>{{ item.campus_location }}{% if item.location_details %} · {{ item.location_details }}{% endif %}</p>
       <p>{% if item.report_type == 'LOST' %}Lost{% else %}Found{% endif %} on {{ item.date_occurrence|date:'d M' }}</p>
       {% if item.report_type == 'FOUND' %}
         {% if user.is_authenticated %}

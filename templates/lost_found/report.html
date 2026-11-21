@@ -46,8 +46,15 @@
 
 <section class="report-section">
   <h2>📍 Where and when</h2>
-  <div class="report-field-full">
-    <label for="{{ form.campus_location.id_for_label }}">Campus location</label>{{ form.campus_location }}
+  <div class="report-grid-two">
+    <div>
+      <label for="{{ form.campus_location.id_for_label }}">Campus location</label>
+      {{ form.campus_location }}
+    </div>
+    <div>
+      <label for="{{ form.location_details.id_for_label }}">Specific spot / Landmark <span>(e.g. In front of 25 block)</span></label>
+      {{ form.location_details }}
+    </div>
   </div>
   <div class="report-grid-two">
     <div>
