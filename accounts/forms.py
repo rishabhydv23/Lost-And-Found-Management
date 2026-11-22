@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .models import Profile
@@ -76,3 +77,40 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ('role', 'phone', 'profile_picture')
         widgets = {'phone': forms.TextInput(attrs={'class': 'form-control'})}
+
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Username or Email",
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Username or Email (e.g. rahul@lpu.in)',
+            'class': 'form-control',
+            'autocomplete': 'username',
+            'autofocus': True,
+        })
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Enter your password',
+            'class': 'form-control',
+            'autocomplete': 'current-password',
+        })
+    )
+
+    def clean(self):
+        username_or_email = self.cleaned_data.get('username', '').strip()
+        password = self.cleaned_data.get('password')
+
+        if username_or_email and password:
+            # Allow login using either Email or Username
+            user_by_email = User.objects.filter(email__iexact=username_or_email).first()
+            actual_username = user_by_email.username if user_by_email else username_or_email
+
+            self.user_cache = authenticate(self.request, username=actual_username, password=password)
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
+            else:
+                self.confirm_login_allowed(self.user_cache)
+
+        return self.cleaned_data

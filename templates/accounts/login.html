@@ -3,23 +3,365 @@
 {% block title %}Sign In — LPU Lost & Found{% endblock %}
 {% block body_class %}auth-page-body{% endblock %}
 {% block content %}
+
+<style>
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0f1225 0%, #1e1b4b 50%, #312e81 100%);
+  position: relative;
+}
+.auth-card-login {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 42px 40px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 5;
+  animation: loginCardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes loginCardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+.auth-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.auth-logo-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.auth-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+.auth-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Error Alert */
+.auth-alert-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #b91c1c;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.auth-alert-box .alert-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Form Fields */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+.form-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-lead {
+  position: absolute;
+  left: 14px;
+  font-size: 15px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+.input-with-icon input {
+  width: 100%;
+  height: 48px;
+  padding: 10px 42px 10px 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-with-icon input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+.pwd-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  color: #94a3b8;
+  transition: color 0.15s;
+}
+.pwd-toggle-btn:hover {
+  color: #475569;
+}
+
+/* Caps Lock Warning */
+.caps-lock-warning {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+/* Options Row (Remember / Forgot) */
+.auth-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  font-size: 13px;
+}
+.auth-remember-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+}
+.auth-remember-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.auth-forgot-link {
+  color: #6366f1;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.auth-forgot-link:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.auth-submit-btn {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.auth-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+.auth-submit-btn:active {
+  transform: translateY(1px);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #64748b;
+}
+.auth-footer a {
+  color: #6366f1;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .auth-card-login { padding: 30px 22px; border-radius: 20px; }
+  .auth-options-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+</style>
+
 <div class="auth-page">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <img src="{% static 'images/logo.png' %}" class="auth-brand-icon" alt="LPU Lost & Found Logo">
+  <div class="auth-card-login">
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="auth-logo-badge">
+        <img src="{% static 'images/logo.png' %}" alt="LPU Lost & Found Logo">
+      </div>
+      <div><span class="auth-eyebrow">🎓 Welcome Back</span></div>
+      <h1 class="auth-title">Sign in to your account</h1>
+      <p class="auth-desc">Manage lost reports, match alerts & ownership claims.</p>
     </div>
-    <p class="eyebrow">Welcome back</p>
-    <h2>Sign in to LPU Lost &amp; Found</h2>
-    <p class="auth-subtitle">Manage reports, matches and ownership claims.</p>
-    <form method="post">
+
+    <!-- Error Banner -->
+    {% if form.errors %}
+    <div class="auth-alert-box">
+      <span class="alert-icon">⚠️</span>
+      <div>
+        <strong>Invalid credentials</strong>
+        <span>Please check your username/email and password and try again.</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <form method="post" id="loginForm" novalidate>
       {% csrf_token %}
-      <table>{{ form.as_table }}</table>
-      <button class="btn btn-primary">Sign In</button>
+
+      <!-- Username or Email -->
+      <div class="form-field">
+        <label for="{{ form.username.id_for_label }}">Username or Campus Email</label>
+        <div class="input-with-icon">
+          <span class="input-icon-lead">👤</span>
+          {{ form.username }}
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-field">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        <div class="input-with-icon">
+          <span class="input-icon-lead">🔒</span>
+          {{ form.password }}
+          <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}', this)" title="Show / Hide Password">👁️</button>
+        </div>
+        <div id="capsLockWarning" class="caps-lock-warning">
+          <span>⚠️</span> <span>Caps Lock is ON</span>
+        </div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="auth-options-row">
+        <label class="auth-remember-check">
+          <input type="checkbox" name="remember_me" checked>
+          <span>Remember me</span>
+        </label>
+        <a class="auth-forgot-link" href="{% url 'password_reset' %}">Forgot password?</a>
+      </div>
+
+      <!-- Submit Button -->
+      <button class="auth-submit-btn" type="submit">
+        🚀 Sign In
+      </button>
     </form>
-    <div class="auth-links">
-      <a href="{% url 'password_reset' %}">Reset password</a>
-      <a href="{% url 'register' %}">Create account</a>
+
+    <div class="auth-footer">
+      Don't have an account yet? <a href="{% url 'register' %}">Create account</a>
     </div>
   </div>
 </div>
+
+<script>
+// Show/Hide Password Toggle
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerText = '🙈';
+  } else {
+    input.type = 'password';
+    btn.innerText = '👁️';
+  }
+}
+
+// Caps Lock Warning Detection
+const pwdInput = document.getElementById('{{ form.password.id_for_label }}');
+const capsWarning = document.getElementById('capsLockWarning');
+
+if (pwdInput && capsWarning) {
+  pwdInput.addEventListener('keyup', (e) => {
+    if (e.getModifierState && e.getModifierState('CapsLock')) {
+      capsWarning.style.display = 'flex';
+    } else {
+      capsWarning.style.display = 'none';
+    }
+  });
+
+  pwdInput.addEventListener('keydown', (e) => {
+    if (e.getModifierState && e.getModifierState('CapsLock')) {
+      capsWarning.style.display = 'flex';
+    } else {
+      capsWarning.style.display = 'none';
+    }
+  });
+
+  pwdInput.addEventListener('blur', () => {
+    capsWarning.style.display = 'none';
+  });
+}
+</script>
+
 {% endblock %}
