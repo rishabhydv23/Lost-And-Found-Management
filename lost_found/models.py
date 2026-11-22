@@ -59,6 +59,7 @@ class ItemReport(models.Model):
     campus_location = models.ForeignKey(CampusLocation, on_delete=models.PROTECT, related_name='item_reports')
     location_details = models.CharField(max_length=150, blank=True, verbose_name="Specific spot / Landmark", help_text="e.g. In front of 25 block, Room 302, Bench near lawn")
     custody = models.CharField(max_length=100, blank=True)
+    finder_phone = models.CharField(max_length=20, blank=True, verbose_name="Finder Phone Number", help_text="Contact number if item is kept with finder")
     identifying_details = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -17,6 +17,7 @@ class ItemReportForm(forms.ModelForm):
             'location_details': forms.TextInput(attrs={'placeholder': 'e.g. In front of 25 block, Room 302, Bench near lawn'}),
             'identifying_details': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Name tags, stickers, scratches, serial numbers. Keep one detail private so you can verify the real owner.'}),
             'custody': forms.TextInput(attrs={'placeholder': 'e.g. Security desk, Block 32 or kept with me'}),
+            'finder_phone': forms.TextInput(attrs={'placeholder': 'e.g. +91 98765 43210', 'class': 'form-control'}),
             'date_occurrence': forms.DateInput(attrs={'type': 'date'}),
             'approximate_time': forms.TimeInput(attrs={'type': 'time'}),
         }

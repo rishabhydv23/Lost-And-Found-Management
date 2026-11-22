@@ -80,10 +80,11 @@
 </section>
 
 <section class="report-section">
-  <h2>🏢 Where the item is now</h2>
-  <p class="section-help">So the owner knows where to collect it.</p>
+  <h2>🏢 Custody & Safe Keeping</h2>
+  <p class="section-help">Where is the item currently kept or where was it last seen?</p>
   <div class="report-field-full">
-    <label for="{{ form.custody.id_for_label }}">Custody</label>{{ form.custody }}
+    <label for="{{ form.custody.id_for_label }}">Custody / Location note</label>
+    {{ form.custody }}
   </div>
 </section>
 

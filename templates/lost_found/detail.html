@@ -203,7 +203,7 @@
         <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ Sign In to Claim</a>
       {% endif %}
     {% else %}
-      <a class="btn btn-primary" href="{% url 'report_found' %}?match_hint={{ item.pk }}">📦 I Found This — Report It</a>
+      <a class="btn btn-primary" href="{% url 'report_found_for_item' item.pk %}">📦 I Found This — Report It</a>
     {% endif %}
   </div>
 </div>
@@ -273,6 +273,12 @@
       <div class="detail-spec-entry">
         <span class="detail-spec-k">🏢 Where the Item is Kept</span>
         <span class="detail-spec-v">{{ item.custody|default:"With reporter / Campus Security" }}</span>
+        {% if item.finder_phone %}
+          <div style="margin-top:6px;font-size:13px;color:#16a34a;font-weight:700;display:flex;align-items:center;gap:6px;">
+            <span>📞 Finder Contact:</span>
+            <a href="tel:{{ item.finder_phone }}" style="color:#16a34a;text-decoration:none;background:rgba(22,163,74,0.1);padding:2px 8px;border-radius:6px;">{{ item.finder_phone }}</a>
+          </div>
+        {% endif %}
       </div>
     </div>
 
@@ -291,7 +297,7 @@
           <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ Sign In to Submit Claim</a>
         {% endif %}
       {% else %}
-        <a class="btn btn-primary" href="{% url 'report_found' %}?match_hint={{ item.pk }}">📦 I Found This Item — Report It</a>
+        <a class="btn btn-primary" href="{% url 'report_found_for_item' item.pk %}">📦 I Found This Item — Report It</a>
       {% endif %}
       <a class="btn btn-outline-secondary" href="{% url 'browse' %}?type={{ item.report_type }}">← Back to {{ item.get_report_type_display }} Listings</a>
     </div>

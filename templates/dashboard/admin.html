@@ -301,6 +301,11 @@
               <div class="detail-drawer-field">
                 <label>Custody / Current Location</label>
                 <p>{{ report.custody|default:"With reporter" }}</p>
+                {% if report.finder_phone %}
+                  <p style="color:#16a34a;font-weight:700;font-size:13px;margin-top:4px;">
+                    📞 Finder Phone: <a href="tel:{{ report.finder_phone }}" style="color:#16a34a;">{{ report.finder_phone }}</a>
+                  </p>
+                {% endif %}
               </div>
               <div class="detail-drawer-field">
                 <label>Specific Spot / Custom Location</label>

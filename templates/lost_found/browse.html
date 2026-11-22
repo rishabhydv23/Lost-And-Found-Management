@@ -598,7 +598,7 @@
             <a class="btn listing-action-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ This is mine</a>
           {% endif %}
         {% else %}
-          <a class="btn listing-action-primary" href="{% url 'item_detail' item.pk %}">👀 I found this</a>
+          <a class="btn listing-action-primary" href="{% url 'report_found_for_item' item.pk %}">👀 I found this</a>
         {% endif %}
       </div>
     </div>
@@ -618,13 +618,14 @@
            data-date="{{ item.date_occurrence|date:'d M Y' }}"
            data-time="{{ item.approximate_time|default:'' }}"
            data-custody="{{ item.custody|default:'With finder / Campus security'|escape }}"
+           data-finder-phone="{{ item.finder_phone|default:''|escape }}"
            data-description="{{ item.description|escape }}"
            data-detail-url="{% url 'item_detail' item.pk %}"
            {% if item.report_type == 'FOUND' %}
            data-action-url="{% if user.is_authenticated %}{% url 'create_claim' item.pk %}{% else %}{% url 'login' %}?next={% url 'item_detail' item.pk %}{% endif %}"
            data-action-label="✋ Submit Ownership Claim"
            {% else %}
-           data-action-url="{% url 'item_detail' item.pk %}"
+           data-action-url="{% url 'report_found_for_item' item.pk %}"
            data-action-label="👀 I Found This Item"
            {% endif %}
            data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
@@ -738,6 +739,7 @@ function openQuickView(pk) {
   const landmark = payload.getAttribute('data-location-details');
   const date = payload.getAttribute('data-date');
   const custody = payload.getAttribute('data-custody') || 'With reporter / Campus Security';
+  const finderPhone = payload.getAttribute('data-finder-phone');
   const desc = payload.getAttribute('data-description') || 'No description provided.';
   const detailUrl = payload.getAttribute('data-detail-url');
   const actionUrl = payload.getAttribute('data-action-url');
@@ -772,7 +774,12 @@ function openQuickView(pk) {
   }
 
   document.getElementById('qvDate').innerText = date;
-  document.getElementById('qvCustody').innerText = custody;
+  const qvCustody = document.getElementById('qvCustody');
+  if (finderPhone) {
+    qvCustody.innerHTML = `${custody}<br><a href="tel:${finderPhone}" style="color:#059669;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:4px;">📞 ${finderPhone}</a>`;
+  } else {
+    qvCustody.innerText = custody;
+  }
   document.getElementById('qvDescription').innerText = desc;
 
   // Actions

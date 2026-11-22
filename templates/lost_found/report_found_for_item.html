@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block title %}Report Found Item — {{ lost_item.item_name }} — LPU Lost & Found{% endblock %}
+
+{% block content %}
+<div class="report-found-container" style="max-width: 920px; margin: 0 auto; padding-bottom: 60px;">
+
+  <!-- Breadcrumb & Back -->
+  <div style="margin-bottom: 16px;">
+    <a href="{% url 'item_detail' lost_item.pk %}" style="color: #6366f1; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+      ← Back to Lost Item Details
+    </a>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header" style="margin-bottom: 24px;">
+    <div class="page-header-info">
+      <p class="eyebrow" style="color: #10b981; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+        ⚡ Quick Match Report
+      </p>
+      <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+        📦 I Found This Item
+      </h1>
+      <p style="color: #64748b; font-size: 15px; margin: 0;">
+        You're reporting that you found a listed lost item. You don't need to re-enter item details — we'll automatically link this to the owner's lost report!
+      </p>
+    </div>
+  </div>
+
+  <!-- Lost Item Summary Card -->
+  <div class="lost-reference-card" style="background: #ffffff; border: 1.5px solid #e0e7ff; border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.08); display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+    <div style="width: 110px; height: 110px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+      {% if lost_item.images.first %}
+        <img src="{{ lost_item.images.first.image.url }}" alt="{{ lost_item.item_name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      {% else %}
+        <span style="font-size: 44px;">📦</span>
+      {% endif %}
+    </div>
+
+    <div style="flex: 1; min-width: 260px;">
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+        <span style="background: #fee2e2; color: #ef4444; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">
+          🔍 Lost Item #{{ lost_item.pk }}
+        </span>
+        <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+          {{ lost_item.category.name }}
+        </span>
+      </div>
+      <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: #1e1b4b;">
+        {{ lost_item.item_name }}
+      </h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #475569;">
+        <span><strong>Color:</strong> {{ lost_item.color }}</span>
+        {% if lost_item.brand %}<span><strong>Brand:</strong> {{ lost_item.brand }}</span>{% endif %}
+        <span><strong>Lost At:</strong> {{ lost_item.campus_location }}</span>
+        <span><strong>Lost On:</strong> {{ lost_item.date_occurrence|date:"d M Y" }}</span>
+        <span><strong>Reported By:</strong> {{ lost_item.user.username }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="post" enctype="multipart/form-data" class="quick-found-form" style="display: flex; flex-direction: column; gap: 24px;">
+    {% csrf_token %}
+
+    <!-- 1. CUSTODY SELECTION (Exact match to requested UI) -->
+    <div class="form-section-card" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+      <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+        <span>🏢</span> Where is the item now?
+      </h2>
+      <p style="color: #64748b; font-size: 14px; margin: 0 0 18px 0;">
+        Specify custody so the owner and administrators know how to recover it safely.
+      </p>
+
+      <input type="hidden" name="custody_choice" id="custodyChoiceInput" value="security">
+
+      <div class="custody-choice-grid">
+        <!-- Option 1: Security Desk -->
+        <div class="custody-card active" id="custodyCardSecurity" onclick="setCustodyChoice('security')">
+          <div class="custody-card-header">
+            <span class="custody-card-icon">🏢</span>
+            <div class="custody-card-info">
+              <strong>Handed over to Campus Security / Office</strong>
+              <small>Left at security desk, warden office, or reception</small>
+            </div>
+          </div>
+          <div class="custody-extra-field" id="custodySecurityBlock">
+            <label for="security_office_name">Security Desk / Office Location</label>
+            <input type="text"
+                   id="security_office_name"
+                   name="security_office_name"
+                   class="form-control"
+                   placeholder="e.g. Block 32 Security Desk, BH-1 Warden Office, Gate 1">
+          </div>
+        </div>
+
+        <!-- Option 2: Finder Phone -->
+        <div class="custody-card" id="custodyCardFinder" onclick="setCustodyChoice('finder')">
+          <div class="custody-card-header">
+            <span class="custody-card-icon">🙋</span>
+            <div class="custody-card-info">
+              <strong>Item is currently with me (Finder)</strong>
+              <small>I am holding it safely and will hand it over directly</small>
+            </div>
+          </div>
+          <div class="custody-extra-field" id="custodyFinderBlock" style="display:none;">
+            <label for="id_finder_phone">
+              Your Phone Number / WhatsApp <span style="color:#ef4444;">*</span>
+            </label>
+            <div style="position:relative;display:flex;align-items:center;">
+              <span style="position:absolute;left:14px;color:#94a3b8;font-size:15px;pointer-events:none;">📞</span>
+              <input type="tel"
+                     id="id_finder_phone"
+                     name="finder_phone"
+                     class="form-control"
+                     style="padding-left:40px;"
+                     placeholder="e.g. +91 98765 43210"
+                     value="{{ default_phone }}">
+            </div>
+            <small class="text-muted" style="display:block;margin-top:6px;font-size:12px;color:#64748b;">
+              The verified owner or campus security will contact you on this number to arrange collection.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES / MESSAGE FOR OWNER (Optional) -->
+    <div class="form-section-card" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+      <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+        <span>💬</span> Message or Handover Note (Optional)
+      </h2>
+      <p style="color: #64748b; font-size: 14px; margin: 0 0 14px 0;">
+        Any additional information, notes on condition, or instructions for the owner.
+      </p>
+      <textarea id="notes" name="notes" rows="3" class="form-control"
+                placeholder="e.g. Found safely. Please call me or pick it up from the security desk."
+                style="width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: 14px;"></textarea>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div style="display: flex; gap: 14px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+      <button type="submit" class="btn" style="background: #4f46e5; color: #fff; font-weight: 700; font-size: 16px; padding: 14px 32px; border-radius: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35); transition: all 0.2s;">
+        📤 Submit Found Report
+      </button>
+      <a href="{% url 'item_detail' lost_item.pk %}" class="btn" style="background: #f1f5f9; color: #475569; font-weight: 600; font-size: 15px; padding: 14px 24px; border-radius: 12px; text-decoration: none;">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<style>
+.custody-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+}
+.custody-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+.custody-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+.custody-card.active {
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+.custody-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.custody-card-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.custody-card-info {
+  display: flex;
+  flex-direction: column;
+}
+.custody-card-info strong {
+  font-size: 14.5px;
+  color: #0f172a;
+  line-height: 1.3;
+}
+.custody-card-info small {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+}
+.custody-extra-field {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #cbd5e1;
+}
+.custody-extra-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 6px;
+  display: block;
+}
+.custody-extra-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 14px;
+}
+.custody-extra-field input:focus {
+  border-color: #6366f1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+@media (max-width: 720px) {
+  .custody-choice-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+function setCustodyChoice(choice) {
+  const choiceInput = document.getElementById('custodyChoiceInput');
+  if (choiceInput) choiceInput.value = choice;
+
+  const cardSec = document.getElementById('custodyCardSecurity');
+  const cardFin = document.getElementById('custodyCardFinder');
+  const blockSec = document.getElementById('custodySecurityBlock');
+  const blockFin = document.getElementById('custodyFinderBlock');
+  const phoneInput = document.getElementById('id_finder_phone');
+
+  if (choice === 'finder') {
+    if (cardSec) cardSec.classList.remove('active');
+    if (cardFin) cardFin.classList.add('active');
+    if (blockSec) blockSec.style.display = 'none';
+    if (blockFin) {
+      blockFin.style.display = 'block';
+      if (phoneInput) {
+        phoneInput.required = true;
+        if (!phoneInput.value) phoneInput.focus();
+      }
+    }
+  } else {
+    if (cardFin) cardFin.classList.remove('active');
+    if (cardSec) cardSec.classList.add('active');
+    if (blockFin) blockFin.style.display = 'none';
+    if (blockSec) blockSec.style.display = 'block';
+    if (phoneInput) phoneInput.required = false;
+  }
+}
+</script>
+{% endblock %}
