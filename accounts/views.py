@@ -5,12 +5,19 @@ from .forms import ProfileForm, RegistrationForm
 
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
     if request.method == 'POST':
+        # Silent honeypot check against spam bots
+        if request.POST.get('honeypot_field'):
+            return redirect('login')
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Your account was created. Please log in.')
+            user = form.save()
+            messages.success(request, f'Welcome, {user.first_name or user.username}! Your account was created successfully. Please sign in.')
             return redirect('login')
+        else:
+            messages.error(request, 'Please correct the highlighted errors in the form.')
     else:
         form = RegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})

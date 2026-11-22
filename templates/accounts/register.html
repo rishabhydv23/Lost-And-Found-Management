@@ -3,21 +3,574 @@
 {% block title %}Register — LPU Lost & Found{% endblock %}
 {% block body_class %}auth-page-body{% endblock %}
 {% block content %}
+
+<style>
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0f1225 0%, #1e1b4b 50%, #312e81 100%);
+  position: relative;
+}
+.auth-card-wide {
+  width: 100%;
+  max-width: 580px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 44px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 5;
+  animation: authCardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes authCardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.auth-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.auth-logo-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.auth-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+.auth-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Error Alert */
+.auth-alert-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+.auth-alert-box strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.auth-alert-box ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+/* Role Selector Radio Cards */
+.role-section {
+  margin-bottom: 20px;
+}
+.role-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: block;
+}
+.role-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.role-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+.role-card.active {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.06);
+  box-shadow: 0 0 0 1px #6366f1;
+}
+.role-card-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.role-card-text {
+  display: flex;
+  flex-direction: column;
+}
+.role-card-text strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+.role-card-text small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Form Layout */
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+.form-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-lead {
+  position: absolute;
+  left: 14px;
+  font-size: 15px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+.input-with-icon input {
+  width: 100%;
+  height: 46px;
+  padding: 10px 42px 10px 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-with-icon input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+.pwd-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  color: #94a3b8;
+  transition: color 0.15s;
+}
+.pwd-toggle-btn:hover {
+  color: #475569;
+}
+
+/* Password Strength & Live Rules */
+.pwd-security-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: -6px;
+  margin-bottom: 18px;
+}
+.pwd-meter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.pwd-meter-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.pwd-meter-status {
+  font-size: 12px;
+  font-weight: 700;
+}
+.pwd-meter-bar {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.pwd-meter-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+.pwd-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pwd-rule-item {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+.pwd-rule-item.valid {
+  color: #16a34a;
+}
+.pwd-rule-item.invalid {
+  color: #94a3b8;
+}
+
+/* Submit Button */
+.auth-submit-btn {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.auth-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+.auth-submit-btn:active {
+  transform: translateY(1px);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #64748b;
+}
+.auth-footer a {
+  color: #6366f1;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 580px) {
+  .auth-card-wide { padding: 28px 20px; border-radius: 18px; }
+  .form-row-two { grid-template-columns: 1fr; gap: 0; }
+  .role-cards-grid { grid-template-columns: 1fr; }
+}
+</style>
+
 <div class="auth-page">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <img src="{% static 'images/logo.png' %}" class="auth-brand-icon" alt="LPU Lost & Found Logo">
+  <div class="auth-card-wide">
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="auth-logo-badge">
+        <img src="{% static 'images/logo.png' %}" alt="LPU Lost & Found Logo">
+      </div>
+      <div><span class="auth-eyebrow">🎓 LPU Campus Network</span></div>
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-desc">Register to report belongings, discover matches & claim items.</p>
     </div>
-    <p class="eyebrow">Join the community</p>
-    <h2>Create your account</h2>
-    <p class="auth-subtitle">Register as a student, faculty or staff member.</p>
-    <form method="post">
+
+    <!-- Errors Banner -->
+    {% if form.errors %}
+    <div class="auth-alert-box">
+      <strong>⚠️ Please correct the following:</strong>
+      <ul>
+        {% for field, error_list in form.errors.items %}
+          {% for error in error_list %}
+            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" id="registerForm" novalidate>
       {% csrf_token %}
-      <table>{{ form.as_table }}</table>
-      <button class="btn btn-primary">Register</button>
+
+      <!-- Hidden honeypot anti-spam field -->
+      <div style="display:none;" aria-hidden="true">
+        <input type="text" name="honeypot_field" tabindex="-1" autocomplete="off">
+      </div>
+
+      <!-- Role Selection -->
+      <div class="role-section">
+        <span class="role-label">Campus Role</span>
+        {{ form.role }}
+        <div class="role-cards-grid">
+          <div class="role-card active" id="roleCardStudent" onclick="selectRole('STUDENT', this)">
+            <span class="role-card-icon">🎓</span>
+            <div class="role-card-text">
+              <strong>Student</strong>
+              <small>Campus scholar / resident</small>
+            </div>
+          </div>
+          <div class="role-card" id="roleCardFaculty" onclick="selectRole('FACULTY', this)">
+            <span class="role-card-icon">👨‍🏫</span>
+            <div class="role-card-text">
+              <strong>Faculty / Staff</strong>
+              <small>Professor, mentor or staff</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- First & Last Name -->
+      <div class="form-row-two">
+        <div class="form-field mb-0">
+          <label for="{{ form.first_name.id_for_label }}">First Name</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">👤</span>
+            {{ form.first_name }}
+          </div>
+        </div>
+        <div class="form-field mb-0">
+          <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">👤</span>
+            {{ form.last_name }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Username & Email -->
+      <div class="form-row-two">
+        <div class="form-field mb-0">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">@</span>
+            {{ form.username }}
+          </div>
+        </div>
+        <div class="form-field mb-0">
+          <label for="{{ form.email.id_for_label }}">Email Address</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">✉️</span>
+            {{ form.email }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Password & Confirm Password -->
+      <div class="form-row-two">
+        <div class="form-field mb-0">
+          <label for="{{ form.password1.id_for_label }}">Password</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">🔒</span>
+            {{ form.password1 }}
+            <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}', this)" title="Show / Hide Password">👁️</button>
+          </div>
+        </div>
+        <div class="form-field mb-0">
+          <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+          <div class="input-with-icon">
+            <span class="input-icon-lead">🔑</span>
+            {{ form.password2 }}
+            <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}', this)" title="Show / Hide Password">👁️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Security Meter & Checklist -->
+      <div class="pwd-security-panel" id="pwdSecurityBox">
+        <div class="pwd-meter-row">
+          <span class="pwd-meter-label">Password Strength</span>
+          <span class="pwd-meter-status" id="pwdStrengthStatus" style="color:#94a3b8;">Enter a password</span>
+        </div>
+        <div class="pwd-meter-bar">
+          <div class="pwd-meter-fill" id="pwdMeterFill"></div>
+        </div>
+        <div class="pwd-rules-list">
+          <span class="pwd-rule-item invalid" id="ruleLength">✕ At least 8 characters</span>
+          <span class="pwd-rule-item invalid" id="ruleContent">✕ Includes letters & numbers or symbols</span>
+          <span class="pwd-rule-item invalid" id="ruleMatch">✕ Passwords match</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button class="auth-submit-btn" type="submit">
+        ✨ Create Account
+      </button>
     </form>
-    <p style="margin-top:16px;margin-bottom:0;font-size:13px;color:var(--ink-secondary);">Already registered? <a
-        href="{% url 'login' %}">Sign in</a></p>
+
+    <div class="auth-footer">
+      Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+    </div>
   </div>
 </div>
+
+<script>
+// Role Card Selection
+function selectRole(roleCode, cardElem) {
+  const roleInput = document.getElementById('{{ form.role.id_for_label }}');
+  if (roleInput) roleInput.value = roleCode;
+
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+  if (cardElem) cardElem.classList.add('active');
+}
+
+// Password Visibility Toggle
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerText = '🙈';
+  } else {
+    input.type = 'password';
+    btn.innerText = '👁️';
+  }
+}
+
+// Live Password Validation & Strength Meter
+const p1Input = document.getElementById('{{ form.password1.id_for_label }}');
+const p2Input = document.getElementById('{{ form.password2.id_for_label }}');
+const meterFill = document.getElementById('pwdMeterFill');
+const strengthStatus = document.getElementById('pwdStrengthStatus');
+const ruleLength = document.getElementById('ruleLength');
+const ruleContent = document.getElementById('ruleContent');
+const ruleMatch = document.getElementById('ruleMatch');
+
+function evaluatePassword() {
+  const val1 = p1Input ? p1Input.value : '';
+  const val2 = p2Input ? p2Input.value : '';
+
+  // Rule 1: Length
+  const hasLength = val1.length >= 8;
+  updateRule(ruleLength, hasLength, 'At least 8 characters');
+
+  // Rule 2: Letters + (Numbers or Symbols)
+  const hasLetters = /[a-zA-Z]/.test(val1);
+  const hasNumbersOrSpecial = /[0-9!@#$%^&*(),.?":{}|<>]/.test(val1);
+  const hasContent = hasLetters && hasNumbersOrSpecial;
+  updateRule(ruleContent, hasContent, 'Includes letters & numbers or symbols');
+
+  // Rule 3: Match
+  const isMatch = val1.length > 0 && val1 === val2;
+  updateRule(ruleMatch, isMatch, 'Passwords match');
+
+  // Compute Score (0 to 4)
+  let score = 0;
+  if (val1.length >= 8) score++;
+  if (val1.length >= 12) score++;
+  if (hasContent) score++;
+  if (/[A-Z]/.test(val1) && /[0-9]/.test(val1) && /[^A-Za-z0-9]/.test(val1)) score++;
+
+  if (val1.length === 0) {
+    meterFill.style.width = '0%';
+    strengthStatus.innerText = 'Enter a password';
+    strengthStatus.style.color = '#94a3b8';
+  } else if (score <= 1) {
+    meterFill.style.width = '25%';
+    meterFill.style.backgroundColor = '#ef4444';
+    strengthStatus.innerText = 'Weak';
+    strengthStatus.style.color = '#ef4444';
+  } else if (score === 2) {
+    meterFill.style.width = '50%';
+    meterFill.style.backgroundColor = '#f59e0b';
+    strengthStatus.innerText = 'Fair';
+    strengthStatus.style.color = '#f59e0b';
+  } else if (score === 3) {
+    meterFill.style.width = '75%';
+    meterFill.style.backgroundColor = '#3b82f6';
+    strengthStatus.innerText = 'Good';
+    strengthStatus.style.color = '#3b82f6';
+  } else {
+    meterFill.style.width = '100%';
+    meterFill.style.backgroundColor = '#10b981';
+    strengthStatus.innerText = 'Strong & Secure';
+    strengthStatus.style.color = '#10b981';
+  }
+}
+
+function updateRule(elem, isValid, text) {
+  if (!elem) return;
+  if (isValid) {
+    elem.className = 'pwd-rule-item valid';
+    elem.innerText = '✓ ' + text;
+  } else {
+    elem.className = 'pwd-rule-item invalid';
+    elem.innerText = '✕ ' + text;
+  }
+}
+
+if (p1Input) p1Input.addEventListener('input', evaluatePassword);
+if (p2Input) p2Input.addEventListener('input', evaluatePassword);
+
+// Clean username on blur
+const uInput = document.getElementById('{{ form.username.id_for_label }}');
+if (uInput) {
+  uInput.addEventListener('blur', () => {
+    uInput.value = uInput.value.trim().toLowerCase().replace(/\s+/g, '_');
+  });
+}
+</script>
+
 {% endblock %}
