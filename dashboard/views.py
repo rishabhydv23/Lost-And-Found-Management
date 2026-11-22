@@ -20,6 +20,8 @@ def home(request):
 
 @login_required
 def dashboard(request):
+    if is_admin(request.user):
+        return redirect('admin_dashboard')
     reports = ItemReport.objects.filter(user=request.user)
     context = {
         'lost_count': reports.filter(report_type='LOST').count(),

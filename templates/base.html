@@ -40,7 +40,8 @@
       </nav>
 
       {% if user.is_authenticated %}
-      <!-- My Account Section -->
+      {% if not user.is_superuser and user.profile.role != 'ADMIN' %}
+      <!-- My Account Section (Regular Users) -->
       <nav class="sidebar-section">
         <div class="sidebar-label">My Account</div>
         <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
@@ -62,9 +63,10 @@
           <span class="link-icon">👤</span> Profile
         </a>
       </nav>
+      {% endif %}
 
       {% if user.is_superuser or user.profile.role == 'ADMIN' %}
-      <!-- Administration Section -->
+      <!-- Administration Section (Admin Users) -->
       <nav class="sidebar-section">
         <div class="sidebar-label">Administration</div>
         <a class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
@@ -81,6 +83,9 @@
         </a>
         <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_taxonomy' %}active{% endif %}" href="{% url 'manage_taxonomy' %}">
           <span class="link-icon">🏷️</span> Categories & Locations
+        </a>
+        <a class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'profile' %}">
+          <span class="link-icon">👤</span> Profile
         </a>
       </nav>
       {% endif %}
