@@ -1,6 +1,511 @@
 {% extends 'base.html' %}
 {% block title %}{{ report_type|title }} Items — LPU Lost & Found{% endblock %}
 {% block content %}
+
+<!-- Critical Scoped Styles for Listings, Quick View Modal, and Lightbox -->
+<style>
+.listing-heading {
+  margin-bottom: 24px;
+}
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.listing-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  background: var(--surface, #fff);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s cubic-bezier(.16,1,.3,1), border-color .22s;
+  cursor: pointer;
+  position: relative;
+}
+.listing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -8px rgba(15,23,42,.12), 0 0 0 1px rgba(99,102,241,.25);
+  border-color: #cbd5e1;
+}
+.listing-media {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--line, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.listing-media .listing-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  padding: 12px;
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+  display: block;
+}
+.listing-card:hover .listing-media .listing-img {
+  transform: scale(1.06);
+}
+.listing-zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(15,23,42,.85);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: all .2s ease;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.listing-card:hover .listing-zoom-hint {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.listing-placeholder-empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f8f9ff, #eef1fb);
+}
+.category-illustration {
+  display: inline-grid;
+  place-items: center;
+  font-size: 52px;
+  filter: saturate(.9);
+  font-family: "Segoe UI Emoji","Apple Color Emoji",sans-serif;
+}
+.listing-card-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.listing-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.listing-type {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.listing-type.lost {
+  background: rgba(239,68,68,.12);
+  color: #ef4444;
+}
+.listing-type.found {
+  background: rgba(16,185,129,.12);
+  color: #10b981;
+}
+.category-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  background: rgba(0,0,0,.04);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.listing-title {
+  margin: 4px 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.3;
+}
+.listing-title a {
+  color: #0f172a;
+  text-decoration: none;
+  transition: color .15s;
+}
+.listing-title a:hover {
+  color: #6366f1;
+}
+.listing-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+.listing-spec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+.listing-spec-item .spec-icon {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.listing-spec-item .spec-text {
+  flex: 1;
+}
+.location-landmark-badge {
+  display: inline-block;
+  background: rgba(99,102,241,.1);
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+.listing-btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.05);
+}
+.listing-btn-group .btn {
+  height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.listing-quickview-trigger {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+.listing-quickview-trigger:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #4338ca;
+}
+.listing-action-primary {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+}
+.listing-action-primary:hover {
+  background: #4f46e5;
+  color: #fff;
+}
+
+/* Modal styles embedded to ensure zero layout disturbance */
+.quickview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,18,37,.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.quickview-box {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 880px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(0,0,0,.35);
+  position: relative;
+  animation: qvPopIn .22s cubic-bezier(.16,1,.3,1);
+}
+@keyframes qvPopIn {
+  from { opacity: 0; transform: scale(.95) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.quickview-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #475569;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 30;
+  transition: all .15s ease;
+}
+.quickview-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.quickview-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr;
+  flex: 1;
+  overflow-y: auto;
+}
+.quickview-image-pane {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #e2e8f0;
+  position: relative;
+}
+.quickview-main-image-wrap {
+  width: 100%;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.quickview-main-image-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  padding: 12px;
+  display: block;
+}
+.quickview-zoom-badge {
+  position: absolute;
+  bottom: 12px;
+  background: rgba(15,23,42,.85);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+.quickview-thumb-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.quickview-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: #fff;
+  object-fit: contain;
+  cursor: pointer;
+  padding: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.quickview-thumb.active {
+  border-color: #6366f1;
+}
+.quickview-info-pane {
+  padding: 28px 24px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.quickview-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.quickview-title {
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: #0f172a;
+}
+.quickview-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+.quickview-spec-cell {
+  display: flex;
+  flex-direction: column;
+}
+.quickview-spec-cell.full-width {
+  grid-column: 1 / -1;
+}
+.quickview-spec-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+.quickview-spec-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.quickview-desc-box {
+  margin-bottom: 18px;
+}
+.quickview-desc-box h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 6px;
+}
+.quickview-desc-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+.quickview-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+.quickview-actions .btn {
+  height: 44px;
+  padding: 0 20px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.quickview-actions .btn-main {
+  flex: 1.4;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+}
+.quickview-actions .btn-main:hover {
+  background: #4f46e5;
+  color: #fff;
+}
+.quickview-actions .btn-link-detail {
+  flex: 1;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+.quickview-actions .btn-link-detail:hover {
+  background: #e2e8f0;
+}
+
+/* Lightbox styles */
+.hd-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,12,24,.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.hd-lightbox-content {
+  position: relative;
+  max-width: 95vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hd-lightbox-img {
+  max-width: 92vw;
+  max-height: 84vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  background: rgba(0,0,0,.2);
+}
+.hd-lightbox-caption {
+  color: rgba(255,255,255,.85);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+}
+.hd-lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.25);
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 10010;
+}
+.hd-lightbox-close:hover {
+  background: rgba(255,255,255,.3);
+}
+
+@media (max-width: 900px) {
+  .listing-grid { grid-template-columns: 1fr; }
+  .quickview-grid { grid-template-columns: 1fr; }
+  .quickview-image-pane { border-right: none; border-bottom: 1px solid #e2e8f0; }
+}
+</style>
+
 <div class="listing-heading">
   <h2>{% if report_type == 'LOST' %}🔍{% else %}📦{% endif %} {{ report_type|title }} Items</h2>
   <p>{% if report_type == 'LOST' %}Things people on campus are looking for. Spot yours or something you found.{% else %}Items handed in or picked up around campus. Find yours and start a claim.{% endif %}</p>
@@ -35,32 +540,96 @@
 
 <div class="listing-grid">
   {% for item in items %}
-  <article class="listing-card">
-    {% if item.images.first %}
-      <img class="listing-placeholder" src="{{ item.images.first.image.url }}" alt="{{ item.item_name }}">
-    {% else %}
-      <div class="listing-placeholder listing-placeholder-empty">
-        <span class="category-illustration">
-          {% if item.category.name == 'Electronics' %}📱{% elif item.category.name == 'Chargers & Accessories' %}🔌{% elif item.category.name == 'ID Cards & Documents' %}🪪{% elif item.category.name == 'Wallets & Money' %}👛{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Bags & Backpacks' %}🎒{% elif item.category.name == 'Books & Stationery' %}📚{% elif item.category.name == 'Clothing & Accessories' %}👕{% elif item.category.name == 'Water Bottles' %}🍶{% elif item.category.name == 'Earphones & Headphones' %}🎧{% elif item.category.name == 'Watches & Jewellery' %}⌚{% elif item.category.name == 'Sports Equipment' %}🏸{% elif item.category.name == 'Eyewear' %}👓{% elif item.category.name == 'Hostel Items' %}🛏️{% else %}📦{% endif %}
-        </span>
-      </div>
-    {% endif %}
-    <div class="listing-card-body">
-      <span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">{{ item.get_report_type_display }}</span>
-      <h3>{{ item.item_name }}</h3>
-      <p>{{ item.category.name }} · {{ item.color|default:'Not specified' }}</p>
-      <p>{{ item.campus_location }}{% if item.location_details %} · {{ item.location_details }}{% endif %}</p>
-      <p>{% if item.report_type == 'LOST' %}Lost{% else %}Found{% endif %} on {{ item.date_occurrence|date:'d M' }}</p>
-      {% if item.report_type == 'FOUND' %}
-        {% if user.is_authenticated %}
-          <a class="listing-action" href="{% url 'create_claim' item.pk %}">✋ This is mine</a>
-        {% else %}
-          <a class="listing-action" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ This is mine</a>
-        {% endif %}
+  <article class="listing-card" id="card-{{ item.pk }}" onclick="openQuickView({{ item.pk }})">
+    <div class="listing-media" style="position:relative;width:100%;height:220px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      {% if item.images.first %}
+        <img class="listing-img" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;padding:12px;display:block;" src="{{ item.images.first.image.url }}" alt="{{ item.item_name }}" loading="lazy">
+        <span class="listing-zoom-hint">🔍 Click for Full Info & Clear Photo</span>
       {% else %}
-        <a class="listing-action" href="{% url 'item_detail' item.pk %}">👀 I found this</a>
+        <div class="listing-placeholder-empty" style="display:grid;place-items:center;width:100%;height:100%;background:linear-gradient(135deg,#f8f9ff,#eef1fb);">
+          <span class="category-illustration">
+            {% if item.category.name == 'Electronics' %}📱{% elif item.category.name == 'Chargers & Accessories' %}🔌{% elif item.category.name == 'ID Cards & Documents' %}🪪{% elif item.category.name == 'Wallets & Money' %}👛{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Bags & Backpacks' %}🎒{% elif item.category.name == 'Books & Stationery' %}📚{% elif item.category.name == 'Clothing & Accessories' %}👕{% elif item.category.name == 'Water Bottles' %}🍶{% elif item.category.name == 'Earphones & Headphones' %}🎧{% elif item.category.name == 'Watches & Jewellery' %}⌚{% elif item.category.name == 'Sports Equipment' %}🏸{% elif item.category.name == 'Eyewear' %}👓{% elif item.category.name == 'Hostel Items' %}🛏️{% else %}📦{% endif %}
+          </span>
+          <span class="listing-zoom-hint">🔍 View Item Details</span>
+        </div>
       {% endif %}
     </div>
+
+    <div class="listing-card-body">
+      <div class="listing-badges">
+        <span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">
+          {% if item.report_type == 'LOST' %}🔍 LOST{% else %}📦 FOUND{% endif %}
+        </span>
+        <span class="category-pill">{{ item.category.name }}</span>
+      </div>
+
+      <h3 class="listing-title">
+        <a href="{% url 'item_detail' item.pk %}" onclick="event.stopPropagation()">{{ item.item_name }}</a>
+      </h3>
+
+      <div class="listing-specs">
+        <div class="listing-spec-item">
+          <span class="spec-icon">🎨</span>
+          <span class="spec-text">{{ item.color|default:'Not specified' }}{% if item.brand %} · <strong>{{ item.brand }}</strong>{% endif %}</span>
+        </div>
+        <div class="listing-spec-item">
+          <span class="spec-icon">📍</span>
+          <span class="spec-text">
+            {{ item.campus_location }}
+            {% if item.location_details %}
+              <span class="location-landmark-badge">📌 {{ item.location_details }}</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="listing-spec-item">
+          <span class="spec-icon">📅</span>
+          <span class="spec-text">{% if item.report_type == 'LOST' %}Lost{% else %}Found{% endif %} on {{ item.date_occurrence|date:'d M Y' }}</span>
+        </div>
+      </div>
+
+      <div class="listing-btn-group" onclick="event.stopPropagation()">
+        <button type="button" class="btn listing-quickview-trigger" onclick="openQuickView({{ item.pk }})">
+          🔍 More Info
+        </button>
+        {% if item.report_type == 'FOUND' %}
+          {% if user.is_authenticated %}
+            <a class="btn listing-action-primary" href="{% url 'create_claim' item.pk %}">✋ This is mine</a>
+          {% else %}
+            <a class="btn listing-action-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ This is mine</a>
+          {% endif %}
+        {% else %}
+          <a class="btn listing-action-primary" href="{% url 'item_detail' item.pk %}">👀 I found this</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Hidden metadata payload for Quick View Modal -->
+    <template id="item-meta-{{ item.pk }}">
+      <div class="quickview-payload"
+           data-id="{{ item.pk }}"
+           data-name="{{ item.item_name|escape }}"
+           data-type="{{ item.report_type }}"
+           data-type-label="{{ item.get_report_type_display }}"
+           data-category="{{ item.category.name|escape }}"
+           data-brand="{{ item.brand|default:'Not specified'|escape }}"
+           data-color="{{ item.color|default:'Not specified'|escape }}"
+           data-location="{{ item.campus_location|escape }}"
+           data-location-details="{{ item.location_details|default:''|escape }}"
+           data-date="{{ item.date_occurrence|date:'d M Y' }}"
+           data-time="{{ item.approximate_time|default:'' }}"
+           data-custody="{{ item.custody|default:'With finder / Campus security'|escape }}"
+           data-description="{{ item.description|escape }}"
+           data-detail-url="{% url 'item_detail' item.pk %}"
+           {% if item.report_type == 'FOUND' %}
+           data-action-url="{% if user.is_authenticated %}{% url 'create_claim' item.pk %}{% else %}{% url 'login' %}?next={% url 'item_detail' item.pk %}{% endif %}"
+           data-action-label="✋ Submit Ownership Claim"
+           {% else %}
+           data-action-url="{% url 'item_detail' item.pk %}"
+           data-action-label="👀 I Found This Item"
+           {% endif %}
+           data-images='[{% for img in item.images.all %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+      </div>
+    </template>
   </article>
   {% empty %}
   <div class="empty-state panel listing-empty">
@@ -70,6 +639,234 @@
   </div>
   {% endfor %}
 </div>
+
+<!-- ===================================================================
+     INTERACTIVE QUICK VIEW MODAL (High-Res Images & Full Item Details)
+     =================================================================== -->
+<div id="quickViewOverlay" class="quickview-overlay" style="display:none;" onclick="handleOverlayClick(event)">
+  <div class="quickview-box" role="dialog" aria-modal="true" aria-labelledby="qvTitle" onclick="event.stopPropagation()">
+    <button type="button" class="quickview-close-btn" onclick="closeQuickView()" title="Close (Esc)">✕</button>
+    <div class="quickview-grid">
+      <!-- Left: High-Definition Image Showcase -->
+      <div class="quickview-image-pane">
+        <div class="quickview-main-image-wrap" id="qvImageWrap" onclick="openHdLightbox()">
+          <img id="qvMainImg" src="" alt="Item photo" style="display:block;">
+          <span class="quickview-zoom-badge" id="qvZoomBadge">🔍 Click to zoom / HD view</span>
+          <div id="qvNoImgPlaceholder" class="category-illustration" style="display:none;font-size:72px;">📦</div>
+        </div>
+        <div class="quickview-thumb-row" id="qvThumbnails"></div>
+      </div>
+
+      <!-- Right: Detailed Info & Specifications -->
+      <div class="quickview-info-pane">
+        <div class="quickview-meta-badges">
+          <span id="qvTypeBadge" class="listing-type"></span>
+          <span id="qvCategoryBadge" class="category-pill"></span>
+        </div>
+        <h2 id="qvTitle" class="quickview-title"></h2>
+
+        <div class="quickview-specs-grid">
+          <div class="quickview-spec-cell">
+            <span class="quickview-spec-label">🎨 Color</span>
+            <span id="qvColor" class="quickview-spec-value"></span>
+          </div>
+          <div class="quickview-spec-cell">
+            <span class="quickview-spec-label">🏷️ Brand</span>
+            <span id="qvBrand" class="quickview-spec-value"></span>
+          </div>
+          <div class="quickview-spec-cell full-width">
+            <span class="quickview-spec-label">📍 Campus Location</span>
+            <span id="qvLocation" class="quickview-spec-value"></span>
+          </div>
+          <div class="quickview-spec-cell full-width" id="qvLandmarkRow">
+            <span class="quickview-spec-label">📌 Specific Spot / Landmark</span>
+            <span id="qvLandmark" class="quickview-spec-value location-landmark-badge" style="font-size:13px;padding:4px 10px;"></span>
+          </div>
+          <div class="quickview-spec-cell">
+            <span class="quickview-spec-label">📅 Date</span>
+            <span id="qvDate" class="quickview-spec-value"></span>
+          </div>
+          <div class="quickview-spec-cell">
+            <span class="quickview-spec-label">🏢 Current Custody</span>
+            <span id="qvCustody" class="quickview-spec-value"></span>
+          </div>
+        </div>
+
+        <div class="quickview-desc-box">
+          <h4>Full Description</h4>
+          <p id="qvDescription"></p>
+        </div>
+
+        <div class="quickview-actions">
+          <a id="qvActionBtn" class="btn btn-main" href="#"></a>
+          <a id="qvDetailLink" class="btn btn-link-detail" href="#">Full Record ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     FULLSCREEN HIGH-DEFINITION LIGHTBOX (Zoom & Detailed Image Inspection)
+     =================================================================== -->
+<div id="hdLightbox" class="hd-lightbox-overlay" style="display:none;" onclick="closeHdLightbox(event)">
+  <button type="button" class="hd-lightbox-close" onclick="closeHdLightbox()" title="Close Lightbox (Esc)">✕</button>
+  <div class="hd-lightbox-content" onclick="event.stopPropagation()">
+    <img id="hdLightboxImg" class="hd-lightbox-img" src="" alt="Full resolution item photo">
+    <div id="hdLightboxCaption" class="hd-lightbox-caption"></div>
+  </div>
+</div>
+
+<script>
+let currentQuickViewImages = [];
+let currentActiveImgIdx = 0;
+let currentItemTitle = '';
+
+function openQuickView(pk) {
+  const template = document.getElementById('item-meta-' + pk);
+  if (!template) return;
+  const payload = template.content.querySelector('.quickview-payload');
+  if (!payload) return;
+
+  currentItemTitle = payload.getAttribute('data-name');
+  const type = payload.getAttribute('data-type');
+  const typeLabel = payload.getAttribute('data-type-label');
+  const category = payload.getAttribute('data-category');
+  const brand = payload.getAttribute('data-brand') || 'Not specified';
+  const color = payload.getAttribute('data-color') || 'Not specified';
+  const location = payload.getAttribute('data-location');
+  const landmark = payload.getAttribute('data-location-details');
+  const date = payload.getAttribute('data-date');
+  const custody = payload.getAttribute('data-custody') || 'With reporter / Campus Security';
+  const desc = payload.getAttribute('data-description') || 'No description provided.';
+  const detailUrl = payload.getAttribute('data-detail-url');
+  const actionUrl = payload.getAttribute('data-action-url');
+  const actionLabel = payload.getAttribute('data-action-label');
+
+  try {
+    currentQuickViewImages = JSON.parse(payload.getAttribute('data-images') || '[]');
+  } catch(e) {
+    currentQuickViewImages = [];
+  }
+  currentActiveImgIdx = 0;
+
+  // Populate Header & Type
+  const typeBadge = document.getElementById('qvTypeBadge');
+  typeBadge.innerText = (type === 'LOST' ? '🔍 ' : '📦 ') + typeLabel.toUpperCase();
+  typeBadge.className = 'listing-type ' + (type === 'LOST' ? 'lost' : 'found');
+
+  document.getElementById('qvCategoryBadge').innerText = category;
+  document.getElementById('qvTitle').innerText = currentItemTitle;
+
+  // Populate Specs
+  document.getElementById('qvColor').innerText = color;
+  document.getElementById('qvBrand').innerText = brand;
+  document.getElementById('qvLocation').innerText = location;
+
+  const landmarkRow = document.getElementById('qvLandmarkRow');
+  if (landmark) {
+    landmarkRow.style.display = '';
+    document.getElementById('qvLandmark').innerText = '📌 ' + landmark;
+  } else {
+    landmarkRow.style.display = 'none';
+  }
+
+  document.getElementById('qvDate').innerText = date;
+  document.getElementById('qvCustody').innerText = custody;
+  document.getElementById('qvDescription').innerText = desc;
+
+  // Actions
+  const actionBtn = document.getElementById('qvActionBtn');
+  actionBtn.href = actionUrl;
+  actionBtn.innerText = actionLabel;
+
+  document.getElementById('qvDetailLink').href = detailUrl;
+
+  // Populate Images
+  updateQuickViewImage();
+
+  // Show Modal safely
+  const overlay = document.getElementById('quickViewOverlay');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function updateQuickViewImage() {
+  const mainImg = document.getElementById('qvMainImg');
+  const zoomBadge = document.getElementById('qvZoomBadge');
+  const noImgPlaceholder = document.getElementById('qvNoImgPlaceholder');
+  const thumbRow = document.getElementById('qvThumbnails');
+  thumbRow.innerHTML = '';
+
+  if (currentQuickViewImages.length > 0) {
+    mainImg.style.display = 'block';
+    mainImg.src = currentQuickViewImages[currentActiveImgIdx];
+    zoomBadge.style.display = 'flex';
+    noImgPlaceholder.style.display = 'none';
+
+    if (currentQuickViewImages.length > 1) {
+      currentQuickViewImages.forEach((url, idx) => {
+        const thumb = document.createElement('img');
+        thumb.src = url;
+        thumb.className = 'quickview-thumb' + (idx === currentActiveImgIdx ? ' active' : '');
+        thumb.onclick = (e) => {
+          e.stopPropagation();
+          currentActiveImgIdx = idx;
+          updateQuickViewImage();
+        };
+        thumbRow.appendChild(thumb);
+      });
+    }
+  } else {
+    mainImg.style.display = 'none';
+    zoomBadge.style.display = 'none';
+    noImgPlaceholder.style.display = 'block';
+  }
+}
+
+function closeQuickView() {
+  const overlay = document.getElementById('quickViewOverlay');
+  overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(event) {
+  if (event.target === document.getElementById('quickViewOverlay')) {
+    closeQuickView();
+  }
+}
+
+function openHdLightbox(imageUrl) {
+  const targetUrl = imageUrl || (currentQuickViewImages.length > 0 ? currentQuickViewImages[currentActiveImgIdx] : null);
+  if (!targetUrl) return;
+
+  const lb = document.getElementById('hdLightbox');
+  const lbImg = document.getElementById('hdLightboxImg');
+  const lbCaption = document.getElementById('hdLightboxCaption');
+
+  lbImg.src = targetUrl;
+  lbCaption.innerText = currentItemTitle ? (currentItemTitle + ' — Clear High-Resolution Image') : 'High-Resolution Item Photo';
+  lb.style.display = 'flex';
+}
+
+function closeHdLightbox(event) {
+  if (!event || event.target === document.getElementById('hdLightbox') || event.target.classList.contains('hd-lightbox-close')) {
+    document.getElementById('hdLightbox').style.display = 'none';
+  }
+}
+
+// Keyboard shortcuts: ESC closes modals
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const lb = document.getElementById('hdLightbox');
+    if (lb && lb.style.display === 'flex') {
+      closeHdLightbox();
+    } else {
+      closeQuickView();
+    }
+  }
+});
+</script>
 
 {% if items.paginator.num_pages > 1 %}
 <nav>

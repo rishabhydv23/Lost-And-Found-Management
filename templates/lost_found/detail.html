@@ -1,47 +1,344 @@
 {% extends 'base.html' %}
 {% block title %}{{ item.item_name }} — LPU Lost & Found{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div class="page-header-info">
-    <p class="eyebrow">Item Record</p>
+
+<style>
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr;
+  gap: 28px;
+  margin-top: 8px;
+}
+.detail-media-showcase {
+  background: #fff;
+  border-radius: var(--radius-xl, 20px);
+  border: 1px solid var(--line, #e2e8f0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.detail-main-img-box {
+  width: 100%;
+  height: 420px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  cursor: zoom-in;
+}
+.detail-main-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  padding: 16px;
+  transition: transform .25s ease;
+  display: block;
+}
+.detail-main-img-box:hover img {
+  transform: scale(1.05);
+}
+.detail-zoom-banner {
+  position: absolute;
+  bottom: 14px;
+  background: rgba(15,23,42,.85);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  pointer-events: none;
+}
+.detail-thumb-strip {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  width: 100%;
+  overflow-x: auto;
+}
+.detail-thumb-strip img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: #f8fafc;
+  object-fit: contain;
+  cursor: pointer;
+  padding: 4px;
+  transition: all .15s;
+}
+.detail-thumb-strip img.active {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+}
+.detail-info-card {
+  background: #fff;
+  border-radius: var(--radius-xl, 20px);
+  border: 1px solid var(--line, #e2e8f0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+.detail-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.detail-item-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+  margin: 0 0 20px;
+  color: #0f172a;
+}
+.detail-specs-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+.detail-spec-entry {
+  display: flex;
+  flex-direction: column;
+}
+.detail-spec-entry.full {
+  grid-column: 1 / -1;
+}
+.detail-spec-k {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+.detail-spec-v {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.detail-location-highlight {
+  display: inline-block;
+  background: rgba(99,102,241,.12);
+  color: #6366f1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.detail-desc-card {
+  margin-bottom: 24px;
+}
+.detail-desc-card h3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 8px;
+}
+.detail-desc-card p {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0;
+}
+.detail-action-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.detail-action-footer .btn {
+  height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+@media (max-width: 900px) {
+  .detail-layout { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- Header & Navigation -->
+<div class="topbar mb-3">
+  <div class="topbar-left">
+    <p class="eyebrow mb-1">
+      <a href="{% url 'browse' %}?type={{ item.report_type }}" style="color:var(--primary);text-decoration:none;">
+        ← Back to {{ item.get_report_type_display }} Listings
+      </a>
+    </p>
     <h1>{{ item.item_name }}</h1>
   </div>
-  <a class="btn btn-secondary" href="{% url 'browse' %}?type={{ item.report_type }}">← Back to Listings</a>
-</div>
-
-<div class="two-col">
-  <div class="panel detail-media" style="padding:16px;display:flex;align-items:center;justify-content:center;">
-    {% for image in item.images.all %}
-      <img class="w-100 rounded" style="margin-bottom:8px;max-height:400px;object-fit:contain;" src="{{ image.image.url }}" alt="{{ item.item_name }}">
-    {% empty %}
-      <div class="empty-state">
-        <div class="empty-icon">🖼️</div>
-        <strong>No image uploaded</strong>
-      </div>
-    {% endfor %}
-  </div>
-
-  <div class="detail-card">
-    <span class="status-badge {% if item.report_type == 'LOST' %}lost-badge{% else %}found-badge{% endif %}">
-      {% if item.report_type == 'LOST' %}🔍{% else %}📦{% endif %} {{ item.get_report_type_display }}
-    </span>
-    <h2>{{ item.item_name }}</h2>
-    <dl>
-      <dt>Category</dt>
-      <dd>{{ item.category }}</dd>
-      <dt>Color</dt>
-      <dd>{{ item.color }}</dd>
-      <dt>Brand</dt>
-      <dd>{{ item.brand|default:'Not provided' }}</dd>
-      <dt>Location</dt>
-      <dd>{{ item.campus_location }}{% if item.location_details %} · <strong>{{ item.location_details }}</strong>{% endif %}</dd>
-      <dt>Date</dt>
-      <dd>{{ item.date_occurrence }}</dd>
-    </dl>
-    <p style="color:var(--ink-secondary);font-size:14px;">{{ item.description }}</p>
-    {% if user.is_authenticated and item.report_type == 'FOUND' %}
-      <a class="btn btn-primary w-100" href="{% url 'create_claim' item.pk %}" style="margin-top:16px;">✋ Submit Ownership Claim</a>
+  <div class="topbar-actions">
+    {% if item.report_type == 'FOUND' %}
+      {% if user.is_authenticated %}
+        <a class="btn btn-primary" href="{% url 'create_claim' item.pk %}">✋ Submit Ownership Claim</a>
+      {% else %}
+        <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ Sign In to Claim</a>
+      {% endif %}
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'report_found' %}?match_hint={{ item.pk }}">📦 I Found This — Report It</a>
     {% endif %}
   </div>
 </div>
+
+<div class="detail-layout">
+  <!-- Left Column: HD Image Viewer with Lightbox Zoom -->
+  <div class="detail-media-showcase">
+    <div class="detail-main-img-box" id="detailMainBox" onclick="openDetailLightbox()">
+      {% if item.images.first %}
+        <img id="detailActiveImg" src="{{ item.images.first.image.url }}" alt="{{ item.item_name }}">
+        <span class="detail-zoom-banner">🔍 Click image to inspect at 100% full scale</span>
+      {% else %}
+        <div class="category-illustration" style="font-size:80px;">
+          {% if item.category.name == 'Electronics' %}📱{% elif item.category.name == 'Chargers & Accessories' %}🔌{% elif item.category.name == 'ID Cards & Documents' %}🪪{% elif item.category.name == 'Wallets & Money' %}👛{% elif item.category.name == 'Keys' %}🔑{% elif item.category.name == 'Bags & Backpacks' %}🎒{% elif item.category.name == 'Books & Stationery' %}📚{% elif item.category.name == 'Clothing & Accessories' %}👕{% elif item.category.name == 'Water Bottles' %}🍶{% elif item.category.name == 'Earphones & Headphones' %}🎧{% elif item.category.name == 'Watches & Jewellery' %}⌚{% elif item.category.name == 'Sports Equipment' %}🏸{% elif item.category.name == 'Eyewear' %}👓{% elif item.category.name == 'Hostel Items' %}🛏️{% else %}📦{% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if item.images.count > 1 %}
+    <!-- Multi-image thumbnails strip -->
+    <div class="detail-thumb-strip">
+      {% for img in item.images.all %}
+        <img src="{{ img.image.url }}"
+             class="{% if forloop.first %}active{% endif %}"
+             alt="Thumbnail {{ forloop.counter }}"
+             onclick="switchDetailImage('{{ img.image.url }}', this)">
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column: Full Specifications & Actions -->
+  <div class="detail-info-card">
+    <div class="detail-badge-row">
+      <span class="listing-type {% if item.report_type == 'LOST' %}lost{% else %}found{% endif %}">
+        {% if item.report_type == 'LOST' %}🔍 LOST ITEM{% else %}📦 FOUND ITEM{% endif %}
+      </span>
+      <span class="category-pill">{{ item.category.name }}</span>
+      <span class="pill pill-{{ item.status|lower }}">{{ item.get_status_display }}</span>
+    </div>
+
+    <h2 class="detail-item-title">{{ item.item_name }}</h2>
+
+    <!-- Specs Grid -->
+    <div class="detail-specs-panel">
+      <div class="detail-spec-entry">
+        <span class="detail-spec-k">🎨 Color</span>
+        <span class="detail-spec-v">{{ item.color|default:"Not specified" }}</span>
+      </div>
+      <div class="detail-spec-entry">
+        <span class="detail-spec-k">🏷️ Brand / Manufacturer</span>
+        <span class="detail-spec-v">{{ item.brand|default:"Not specified" }}</span>
+      </div>
+      <div class="detail-spec-entry full">
+        <span class="detail-spec-k">📍 Campus Location</span>
+        <span class="detail-spec-v">{{ item.campus_location }}</span>
+        {% if item.location_details %}
+          <div class="detail-location-highlight">
+            📌 Spot / Landmark: {{ item.location_details }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="detail-spec-entry">
+        <span class="detail-spec-k">📅 Occurrence Date</span>
+        <span class="detail-spec-v">{{ item.date_occurrence|date:"d M Y" }}{% if item.approximate_time %} at {{ item.approximate_time|time:"H:i" }}{% endif %}</span>
+      </div>
+      <div class="detail-spec-entry">
+        <span class="detail-spec-k">🏢 Where the Item is Kept</span>
+        <span class="detail-spec-v">{{ item.custody|default:"With reporter / Campus Security" }}</span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="detail-desc-card">
+      <h3>Full Description</h3>
+      <p>{{ item.description|linebreaksbr }}</p>
+    </div>
+
+    <!-- Action Section -->
+    <div class="detail-action-footer">
+      {% if item.report_type == 'FOUND' %}
+        {% if user.is_authenticated %}
+          <a class="btn btn-primary" href="{% url 'create_claim' item.pk %}">✋ Submit Ownership Claim</a>
+        {% else %}
+          <a class="btn btn-primary" href="{% url 'login' %}?next={% url 'item_detail' item.pk %}">✋ Sign In to Submit Claim</a>
+        {% endif %}
+      {% else %}
+        <a class="btn btn-primary" href="{% url 'report_found' %}?match_hint={{ item.pk }}">📦 I Found This Item — Report It</a>
+      {% endif %}
+      <a class="btn btn-outline-secondary" href="{% url 'browse' %}?type={{ item.report_type }}">← Back to {{ item.get_report_type_display }} Listings</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     FULLSCREEN HIGH-DEFINITION LIGHTBOX
+     =================================================================== -->
+<div id="detailHdLightbox" class="hd-lightbox-overlay" style="display:none;" onclick="closeDetailLightbox(event)">
+  <button type="button" class="hd-lightbox-close" onclick="closeDetailLightbox()" title="Close Lightbox (Esc)">✕</button>
+  <div class="hd-lightbox-content" onclick="event.stopPropagation()">
+    <img id="detailLightboxImg" class="hd-lightbox-img" src="{% if item.images.first %}{{ item.images.first.image.url }}{% endif %}" alt="{{ item.item_name }}">
+    <div class="hd-lightbox-caption">{{ item.item_name }} — Clear High-Resolution Photo</div>
+  </div>
+</div>
+
+<script>
+function switchDetailImage(url, thumbElem) {
+  const activeImg = document.getElementById('detailActiveImg');
+  if (activeImg) activeImg.src = url;
+  const lbImg = document.getElementById('detailLightboxImg');
+  if (lbImg) lbImg.src = url;
+
+  document.querySelectorAll('.detail-thumb-strip img').forEach(img => img.classList.remove('active'));
+  if (thumbElem) thumbElem.classList.add('active');
+}
+
+function openDetailLightbox() {
+  const activeImg = document.getElementById('detailActiveImg');
+  if (!activeImg) return;
+  const lbImg = document.getElementById('detailLightboxImg');
+  if (lbImg) lbImg.src = activeImg.src;
+  document.getElementById('detailHdLightbox').style.display = 'flex';
+}
+
+function closeDetailLightbox(event) {
+  if (!event || event.target === document.getElementById('detailHdLightbox') || event.target.classList.contains('hd-lightbox-close')) {
+    document.getElementById('detailHdLightbox').style.display = 'none';
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDetailLightbox();
+  }
+});
+</script>
+
 {% endblock %}
