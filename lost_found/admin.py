@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, CampusLocation, ItemReport, ItemImage, PotentialMatch
+
+from .models import CampusLocation, Category, ItemImage, ItemReport, PotentialMatch
 
 admin.site.register(Category)
 admin.site.register(CampusLocation)

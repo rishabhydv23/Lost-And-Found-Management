@@ -1,12 +1,15 @@
 import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+
 from notifications.models import Notification
+
 from .forms import ItemReportForm
 from .matching import run_matching
-from .models import Category, CampusLocation, ItemReport, ItemImage, PotentialMatch
+from .models import CampusLocation, Category, ItemImage, ItemReport, PotentialMatch
 
 
 def browse(request):
