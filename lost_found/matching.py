@@ -1,7 +1,10 @@
 from datetime import timedelta
+
 from rapidfuzz.fuzz import ratio
-from .models import PotentialMatch
+
 from notifications.models import Notification
+
+from .models import PotentialMatch
 
 
 def calculate_match_score(lost, found):

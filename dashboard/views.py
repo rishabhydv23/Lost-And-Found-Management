@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+
 from accounts.models import Profile
 from claims.models import Claim, RecoveryRecord
-from lost_found.models import ItemReport, Category, CampusLocation, PotentialMatch
 from lost_found.matching import run_matching
+from lost_found.models import CampusLocation, Category, ItemReport, PotentialMatch
 from notifications.models import Notification
 
 
